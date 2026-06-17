@@ -1,0 +1,319 @@
+@config "../../tailwind.config.ts";
+@import "tailwindcss";
+@source not "../data/generated/**";
+@source not "../../data/**";
+@source not "../../docs/**";
+
+:root {
+  /* Base — deep, slightly-blue intelligence dark */
+  --background: #05070d;
+  --background-2: #070a12;
+  --foreground: #e6ecf3;
+  --foreground-muted: #9aa6b6;
+
+  --surface: rgba(15, 21, 32, 0.92);
+  --surface-muted: rgba(13, 18, 28, 0.66);
+  --border: rgba(148, 167, 196, 0.16);
+  --border-strong: rgba(148, 167, 196, 0.3);
+
+  /* Accents — refined sage "field" + cool cyan "signal" */
+  --accent: #b4c98a;
+  --accent-soft: rgba(180, 201, 138, 0.16);
+  --signal: #57d0e0;
+  --signal-soft: rgba(87, 208, 224, 0.14);
+
+  /* Semantic (verified / presence / partial / alert) */
+  --ok: #4ade80;
+  --info: #60a5fa;
+  --warn: #fbbf24;
+  --alert: #fb7185;
+
+  /* Tactical surfaces — keep the technical signature, add depth + a hairline top highlight */
+  --tactical-border: rgba(86, 99, 80, 0.5);
+  --tactical-border-strong: rgba(180, 201, 138, 0.34);
+  --tactical-panel-fill: linear-gradient(180deg, rgba(16, 21, 24, 0.96), rgba(10, 13, 16, 0.93));
+  --tactical-panel-fill-strong: linear-gradient(180deg, rgba(22, 28, 24, 0.97), rgba(12, 15, 14, 0.94));
+  --tactical-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.35);
+
+  --font-inter: "Inter";
+  --font-mono: "IBM Plex Mono";
+  --font-display: "Inter";
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv03", "cv04", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+
+/* Layered intelligence backdrop: deep gradient + faint signal glows + a fine technical grid */
+.tactical-shell-bg {
+  background:
+    radial-gradient(1200px 600px at 78% -10%, rgba(87, 208, 224, 0.06), transparent 60%),
+    radial-gradient(1000px 520px at 8% 108%, rgba(180, 201, 138, 0.05), transparent 60%),
+    linear-gradient(180deg, #05070d 0%, #060912 40%, #070a12 100%);
+  position: relative;
+}
+.tactical-shell-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 167, 196, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 167, 196, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(120% 120% at 50% 0%, #000 35%, transparent 78%);
+  opacity: 0.6;
+}
+
+.tactical-panel,
+.tactical-modal-surface {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--tactical-border);
+  border-radius: 4px;
+  background: var(--tactical-panel-fill);
+  box-shadow: var(--tactical-shadow);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+/* hairline top highlight = premium depth */
+.tactical-panel::after,
+.tactical-modal-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  pointer-events: none;
+}
+
+.tactical-panel-strong {
+  border-color: var(--tactical-border-strong);
+  background: var(--tactical-panel-fill-strong);
+  box-shadow: var(--tactical-shadow), 0 0 0 1px rgba(180, 201, 138, 0.06) inset;
+}
+
+.tactical-rail {
+  background: linear-gradient(180deg, rgba(14, 18, 22, 0.985), rgba(9, 12, 15, 0.96));
+}
+
+/* Glass — for floating panels / overlays */
+.glass-panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(20, 27, 38, 0.72), rgba(12, 16, 24, 0.6));
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(22px) saturate(130%);
+}
+
+.tactical-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(94, 107, 86, 0.6);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(22, 27, 26, 0.92), rgba(13, 16, 17, 0.86));
+  padding: 0.34rem 0.68rem;
+  color: #cdd2c6;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+.tactical-chip:hover {
+  border-color: rgba(180, 201, 138, 0.4);
+  color: #e7ecdc;
+}
+
+.tactical-chip-active {
+  border-color: rgba(180, 201, 138, 0.5);
+  background: linear-gradient(180deg, rgba(40, 48, 33, 0.96), rgba(26, 31, 22, 0.9));
+  color: #e3ecca;
+  box-shadow: 0 0 0 1px rgba(180, 201, 138, 0.08), 0 0 18px -6px rgba(180, 201, 138, 0.35);
+}
+
+/* Signal chip — cool accent for data/active intelligence states */
+.signal-chip {
+  border-color: rgba(87, 208, 224, 0.45);
+  background: linear-gradient(180deg, rgba(18, 38, 42, 0.95), rgba(11, 22, 25, 0.9));
+  color: #b7eef5;
+  box-shadow: 0 0 18px -6px rgba(87, 208, 224, 0.4);
+}
+
+.tactical-input,
+.tactical-control {
+  border: 1px solid rgba(94, 107, 86, 0.55);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(17, 22, 22, 0.96), rgba(10, 13, 14, 0.92));
+}
+
+.tactical-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  color: white;
+}
+.tactical-input:focus {
+  border-color: rgba(87, 208, 224, 0.55);
+  box-shadow: 0 0 0 3px rgba(87, 208, 224, 0.12);
+  outline: none;
+}
+
+.tactical-input::placeholder {
+  color: #767c70;
+}
+
+.tactical-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+.tactical-control:hover {
+  border-color: var(--border-strong);
+}
+
+.tactical-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(87, 208, 224, 0.28) transparent;
+}
+.tactical-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.tactical-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tactical-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  background: rgba(110, 126, 110, 0.5);
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+.tactical-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(87, 208, 224, 0.45);
+  background-clip: padding-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+h1 { font-size: 2.5rem; line-height: 1.15; letter-spacing: -0.03em; }
+h2 { font-size: 2rem; line-height: 1.22; letter-spacing: -0.025em; }
+h3 { font-size: 1.5rem; line-height: 1.3; }
+h4 { font-size: 1.25rem; line-height: 1.35; }
+
+/* Hero display text with a subtle premium gradient */
+.display-title {
+  background: linear-gradient(120deg, #f4f8fb 0%, #cfe7ec 55%, #d8e3bd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.03em;
+}
+
+/* Eyebrow / kicker label (the small uppercase headers) */
+.eyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+a, button, input, select, textarea {
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(87, 208, 224, 0.75);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(87, 208, 224, 0.26);
+  color: white;
+}
+
+/* Subtle live-signal pulse for "active/live" indicators */
+@keyframes signal-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(87, 208, 224, 0.45); }
+  50% { opacity: 0.55; box-shadow: 0 0 0 4px rgba(87, 208, 224, 0); }
+}
+.signal-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--signal);
+  animation: signal-pulse 2.4s ease-in-out infinite;
+}
+
+/* Source label styling */
+.source-label {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.82;
+}
+
+.city-title { font-family: "Inter", system-ui, -apple-system, sans-serif; font-weight: 700; letter-spacing: -0.025em; }
+.city-subtitle { font-family: "Inter", system-ui, -apple-system, sans-serif; font-weight: 400; opacity: 0.82; }
+
+.entity-name { font-family: "Inter", system-ui, -apple-system, sans-serif; font-weight: 600; }
+.entity-type { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.7; }
+
+.metric-label { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+.metric-value { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.metric-unit { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.875rem; font-weight: 400; opacity: 0.7; }
+
+.coverage-badge { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.map-legend { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.6875rem; font-weight: 500; }
+.map-label { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; font-weight: 500; }
+
+.tab-label { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.03em; }
+.chip-label { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.05em; }
+
+.table-header { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+.table-cell { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.8125rem; font-weight: 400; }
+
+.sidebar-heading { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
+.sidebar-item { font-family: "Inter", system-ui, -apple-system, sans-serif; font-size: 0.8125rem; font-weight: 400; }
+
+/* Coordinate / data mono readout (OSINT signature) */
+.mono-readout { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }

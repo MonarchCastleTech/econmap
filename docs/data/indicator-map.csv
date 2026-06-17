@@ -1,0 +1,24 @@
+indicator_id,kind,actual_sources,estimate_sources,forecast_sources,derived_from,nullable,notes
+gdp-current-usd,direct,world-bank,imf-weo,imf-weo,,false,World Bank for actuals and IMF for forward paths
+gdp-per-capita,derived,,,,gdp-current-usd|population,false,Derived metric not fetched directly
+gdp-growth,direct,world-bank|imf-weo,imf-weo,imf-weo,,false,One precedence rule must be enforced in normalization
+inflation-cpi,direct,world-bank|imf-weo,imf-weo,imf-weo,,false,Keep annual methodology consistent globally
+inflation-ppi,direct,imf-weo,,, ,true,Remain nullable until repeatable source is ready
+unemployment,direct,ilo,ilo|imf-weo,imf-weo|mapfactbook-lab,,false,Forecasts may be scenario-derived
+population,direct,undesa,undesa,undesa,,false,History and projection can come from one provider
+exports-usd,direct,world-bank|wto,imf-weo|wto,imf-weo,,false,Trade totals separate from bilateral flow detail
+imports-usd,direct,world-bank|wto,imf-weo|wto,imf-weo,,false,Trade totals separate from bilateral flow detail
+debt-to-gdp,direct,imf-weo,imf-weo,imf-weo,,false,IMF can stay canonical
+policy-rate,direct,imf-weo,imf-weo,,,true,Do not fake full global comparability
+exchange-rate,direct,world-bank|imf-weo,imf-weo,imf-weo,,false,Keep local_per_usd unit explicit
+median-age,direct,undesa,undesa,undesa,,false,Demographic series
+fertility,direct,undesa,undesa,undesa,,false,Demographic series
+urbanization,direct,undesa|world-bank,undesa,undesa,,false,UN projection preferred for forward years
+labor-force-participation,direct,ilo,ilo,mapfactbook-lab,,true,Nullable if no forecast path exists
+gini,direct,world-bank|world-bank-pip,,,,true,Sparse coverage is acceptable
+renewables-share,direct,world-bank|iea-demo,iea-demo,iea-demo|mapfactbook-lab,,true,Use official source when available
+emissions-per-capita,direct,world-bank|iea-demo,iea-demo,mapfactbook-lab,,true,Separate actual from scenario values
+electricity-access,direct,world-bank|iea-demo,,mapfactbook-lab,,true,Allow held-flat or null forecast strategy
+internet-penetration,direct,world-bank,,mapfactbook-lab,,false,Can later expand to ITU-backed source
+logistics-score,direct,world-bank,,,,true,Sparse source should be held constant between releases
+business-climate,composite,world-bank-enterprise-surveys|mapfactbook-lab,mapfactbook-lab,mapfactbook-lab,,true,Transparent internal composite until direct source is chosen

@@ -1,0 +1,23 @@
+# Raw bulk data — build-time only, never deployed
+data/raw/
+data/processed/
+
+# Build artifacts
+node_modules/
+.next/
+
+# Development files
+*.md
+*.png
+*.log
+.codex-*
+.codex-output/
+.env*
+.git/
+.gitignore
+coverage/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/

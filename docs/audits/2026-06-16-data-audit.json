@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-06-16T21:02:10.437Z",
+  "overall": "pass",
+  "results": [
+    {
+      "id": "size-budget",
+      "title": "Size budget (GitHub Pages limits)",
+      "status": "pass",
+      "failures": [],
+      "warnings": [],
+      "metrics": {
+        "totalMB": 902.2,
+        "fileCount": 119168,
+        "largestFileMB": 0
+      }
+    },
+    {
+      "id": "license",
+      "title": "Source licenses (no commercial/unknown)",
+      "status": "pass",
+      "failures": [],
+      "warnings": [],
+      "metrics": {
+        "activeSources": 8,
+        "commercial": 0,
+        "unknown": 0
+      }
+    },
+    {
+      "id": "count-consistency",
+      "title": "Counts trace to the city manifest",
+      "status": "pass",
+      "failures": [],
+      "warnings": [],
+      "metrics": {
+        "totalCities": 189025,
+        "processed": 87846,
+        "sources": 6
+      }
+    },
+    {
+      "id": "provenance",
+      "title": "Provenance (every entity is source-backed)",
+      "status": "pass",
+      "failures": [],
+      "warnings": [],
+      "metrics": {
+        "scanned": 25111,
+        "unsourced": 0
+      }
+    },
+    {
+      "id": "geospatial",
+      "title": "Geospatial sanity (coords in bounds)",
+      "status": "pass",
+      "failures": [],
+      "warnings": [],
+      "metrics": {
+        "scanned": 20062,
+        "outOfBounds": 0,
+        "nullIsland": 0
+      }
+    }
+  ]
+}

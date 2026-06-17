@@ -1,0 +1,14 @@
+Now upgrade the current MapFactbook codebase to production quality:
+- improve visual polish
+- tighten spacing and typography
+- improve dark theme
+- add better map interactions
+- improve loading/empty/error states
+- make country and region pages feel more premium
+- add more realistic mock data coverage
+- improve compare mode, rankings, and export flows
+- refactor duplicated code
+- improve responsiveness
+- improve accessibility
+- fix any TypeScript issues
+- make the app demo-ready

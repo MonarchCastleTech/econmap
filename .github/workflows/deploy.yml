@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages
+
+# EconMap's data is built LOCALLY (the 19GB bulk source data + the city pipeline cannot run in CI).
+# So you build + assemble + audit on your machine, upload the slimmed out/ as a Release asset, then
+# trigger this workflow with that release tag. The job only downloads the prebuilt site and deploys it
+# — fast, and it never needs the bulk data or the pipeline.
+#
+#   Local (once per publish):
+#     npm run build && npm run deploy:assemble && npm run audit:data   # audit must PASS
+#     tar -czf econmap-site.tar.gz -C out .
+#     gh release create site-$(date +%Y%m%d) econmap-site.tar.gz       # gh auth login first
+#   Then run this workflow with release_tag = site-YYYYMMDD.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag holding econmap-site.tar.gz"
+        required: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download prebuilt site tarball from the Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "${{ inputs.release_tag }}" --repo "${{ github.repository }}" -p 'econmap-site.tar.gz' -D .
+      - name: Extract out/
+        run: mkdir -p out && tar -xzf econmap-site.tar.gz -C out && touch out/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+      - id: deploy
+        uses: actions/deploy-pages@v4

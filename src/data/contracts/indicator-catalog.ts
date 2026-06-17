@@ -1,0 +1,200 @@
+import { z } from "zod";
+
+const indicatorAcquisitionSchema = z.object({
+  id: z.string(),
+  kind: z.enum(["direct", "derived", "composite"]),
+  actualSources: z.array(z.string()),
+  estimateSources: z.array(z.string()).default([]),
+  forecastSources: z.array(z.string()).default([]),
+  derivedFrom: z.array(z.string()).default([]),
+  nullable: z.boolean().default(false),
+  notes: z.string().optional(),
+});
+
+export type IndicatorAcquisition = z.infer<typeof indicatorAcquisitionSchema>;
+
+export const indicatorCatalog = indicatorAcquisitionSchema.array().parse([
+  {
+    id: "gdp-current-usd",
+    kind: "direct",
+    actualSources: ["world-bank"],
+    estimateSources: ["imf-weo"],
+    forecastSources: ["imf-weo"],
+  },
+  {
+    id: "gdp-per-capita",
+    kind: "derived",
+    actualSources: [],
+    estimateSources: [],
+    forecastSources: [],
+    derivedFrom: ["gdp-current-usd", "population"],
+    notes: "Derived from nominal GDP and population rather than fetched as a separate series.",
+  },
+  {
+    id: "gdp-growth",
+    kind: "direct",
+    actualSources: ["world-bank", "imf-weo"],
+    estimateSources: ["imf-weo"],
+    forecastSources: ["imf-weo"],
+  },
+  {
+    id: "inflation-cpi",
+    kind: "direct",
+    actualSources: ["world-bank", "imf-weo"],
+    estimateSources: ["imf-weo"],
+    forecastSources: ["imf-weo"],
+  },
+  {
+    id: "inflation-ppi",
+    kind: "direct",
+    actualSources: ["imf-weo"],
+    estimateSources: [],
+    forecastSources: [],
+    nullable: true,
+    notes: "Remain nullable until a repeatable cross-country annual source is wired in.",
+  },
+  {
+    id: "unemployment",
+    kind: "direct",
+    actualSources: ["ilo"],
+    estimateSources: ["ilo", "imf-weo"],
+    forecastSources: ["imf-weo", "mapfactbook-lab"],
+  },
+  {
+    id: "population",
+    kind: "direct",
+    actualSources: ["undesa"],
+    estimateSources: ["undesa"],
+    forecastSources: ["undesa"],
+  },
+  {
+    id: "exports-usd",
+    kind: "direct",
+    actualSources: ["world-bank", "wto"],
+    estimateSources: ["imf-weo", "wto"],
+    forecastSources: ["imf-weo"],
+  },
+  {
+    id: "imports-usd",
+    kind: "direct",
+    actualSources: ["world-bank", "wto"],
+    estimateSources: ["imf-weo", "wto"],
+    forecastSources: ["imf-weo"],
+  },
+  {
+    id: "debt-to-gdp",
+    kind: "direct",
+    actualSources: ["imf-weo"],
+    estimateSources: ["imf-weo"],
+    forecastSources: ["imf-weo"],
+  },
+  {
+    id: "policy-rate",
+    kind: "direct",
+    actualSources: ["imf-weo"],
+    estimateSources: ["imf-weo"],
+    forecastSources: [],
+    nullable: true,
+  },
+  {
+    id: "exchange-rate",
+    kind: "direct",
+    actualSources: ["world-bank", "imf-weo"],
+    estimateSources: ["imf-weo"],
+    forecastSources: ["imf-weo"],
+  },
+  {
+    id: "median-age",
+    kind: "direct",
+    actualSources: ["undesa"],
+    estimateSources: ["undesa"],
+    forecastSources: ["undesa"],
+  },
+  {
+    id: "fertility",
+    kind: "direct",
+    actualSources: ["undesa"],
+    estimateSources: ["undesa"],
+    forecastSources: ["undesa"],
+  },
+  {
+    id: "urbanization",
+    kind: "direct",
+    actualSources: ["undesa", "world-bank"],
+    estimateSources: ["undesa"],
+    forecastSources: ["undesa"],
+  },
+  {
+    id: "labor-force-participation",
+    kind: "direct",
+    actualSources: ["ilo"],
+    estimateSources: ["ilo"],
+    forecastSources: ["mapfactbook-lab"],
+    nullable: true,
+  },
+  {
+    id: "gini",
+    kind: "direct",
+    actualSources: ["world-bank", "world-bank-pip"],
+    estimateSources: [],
+    forecastSources: [],
+    nullable: true,
+  },
+  {
+    id: "renewables-share",
+    kind: "direct",
+    actualSources: ["world-bank", "iea-demo"],
+    estimateSources: ["iea-demo"],
+    forecastSources: ["iea-demo", "mapfactbook-lab"],
+    nullable: true,
+  },
+  {
+    id: "emissions-per-capita",
+    kind: "direct",
+    actualSources: ["world-bank", "iea-demo"],
+    estimateSources: ["iea-demo"],
+    forecastSources: ["mapfactbook-lab"],
+    nullable: true,
+  },
+  {
+    id: "electricity-access",
+    kind: "direct",
+    actualSources: ["world-bank", "iea-demo"],
+    estimateSources: [],
+    forecastSources: ["mapfactbook-lab"],
+    nullable: true,
+  },
+  {
+    id: "internet-penetration",
+    kind: "direct",
+    actualSources: ["world-bank"],
+    estimateSources: [],
+    forecastSources: ["mapfactbook-lab"],
+  },
+  {
+    id: "logistics-score",
+    kind: "direct",
+    actualSources: ["world-bank"],
+    estimateSources: [],
+    forecastSources: [],
+    nullable: true,
+    notes: "Hold constant between sparse publication years rather than invent annual movements.",
+  },
+  {
+    id: "business-climate",
+    kind: "composite",
+    actualSources: ["world-bank-enterprise-surveys", "mapfactbook-lab"],
+    estimateSources: ["mapfactbook-lab"],
+    forecastSources: ["mapfactbook-lab"],
+    nullable: true,
+    notes: "Transparent MapFactbook composite until a stronger direct global series is chosen.",
+  },
+]);
+
+export const indicatorCatalogById = Object.fromEntries(
+  indicatorCatalog.map((entry) => [entry.id, entry]),
+) as Record<string, IndicatorAcquisition>;
+
+export function getIndicatorAcquisition(indicatorId: string) {
+  return indicatorCatalogById[indicatorId];
+}

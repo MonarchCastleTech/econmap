@@ -1,0 +1,68 @@
+import { historicalEventSchema } from "@/domain/schemas";
+
+export const historicalEvents = historicalEventSchema.array().parse([
+  {
+    id: "event-us-2020",
+    entityId: "united-states",
+    year: 2020,
+    title: "Pandemic recession and emergency fiscal response",
+    kind: "recession",
+    summary: "Output contracted sharply before a rapid policy-led rebound.",
+  },
+  {
+    id: "event-us-2022",
+    entityId: "united-states",
+    year: 2022,
+    title: "Fastest policy tightening cycle in decades",
+    kind: "policy-shift",
+    summary: "The Federal Reserve lifted rates aggressively to contain inflation.",
+  },
+  {
+    id: "event-germany-2022",
+    entityId: "germany",
+    year: 2022,
+    title: "Energy shock reshapes industrial cost base",
+    kind: "crisis",
+    summary: "Energy import disruption pushed up costs and accelerated diversification.",
+  },
+  {
+    id: "event-india-2016",
+    entityId: "india",
+    year: 2016,
+    title: "Currency demonetization and payments shift",
+    kind: "policy-shift",
+    summary: "A large banknote withdrawal accelerated digital payments adoption.",
+  },
+  {
+    id: "event-brazil-2015",
+    entityId: "brazil",
+    year: 2015,
+    title: "Deep recession and fiscal strain",
+    kind: "recession",
+    summary: "Brazil entered a severe downturn amid commodity weakness and political stress.",
+  },
+  {
+    id: "event-turkiye-2018",
+    entityId: "turkiye",
+    year: 2018,
+    title: "Currency crisis and macro rebalancing",
+    kind: "devaluation",
+    summary: "A sharp lira selloff triggered inflation and tighter financial conditions.",
+  },
+  {
+    id: "event-china-2021",
+    entityId: "china",
+    year: 2021,
+    title: "Property deleveraging campaign intensifies",
+    kind: "reform",
+    summary: "Housing and credit conditions tightened as leverage controls were enforced.",
+  },
+  {
+    id: "event-south-africa-2023",
+    entityId: "south-africa",
+    year: 2023,
+    title: "Power shortages constrain industrial output",
+    kind: "crisis",
+    summary: "Persistent electricity disruptions weighed on production and confidence.",
+  },
+]);
