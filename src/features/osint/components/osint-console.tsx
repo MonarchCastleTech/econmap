@@ -21,6 +21,7 @@ import {
   type CitySearchIndexEntry,
 } from "@/lib/city-data-client";
 import { COVERAGE_STYLE, entityIcon, entityLabel, fmtPop } from "@/features/osint/lib/entity-display";
+import { EntityMiniMap } from "@/features/osint/components/entity-mini-map";
 
 type Entity = NonNullable<Awaited<ReturnType<typeof loadCityEntities>>>["entities"][number];
 type Sources = NonNullable<Awaited<ReturnType<typeof loadCityEntities>>>["sources"];
@@ -181,6 +182,10 @@ export function OsintConsole() {
             <Crosshair aria-hidden className="size-4 text-cyan-300" />
             OSINT
           </span>
+          <span className="text-sm text-slate-600">/</span>
+          <Link href="/osint/compare" className="text-sm font-medium text-slate-300 transition-colors hover:text-white">
+            Compare
+          </Link>
         </div>
         <span className="hidden text-xs text-slate-500 sm:block">
           {index ? `${index.length.toLocaleString("en-US")} cities indexed` : "loading index…"}
@@ -270,12 +275,20 @@ export function OsintConsole() {
                     {[selected.admin1Name, selected.countryIso3].filter(Boolean).join(" · ")} · {fmtPop(selected.population)}
                   </p>
                 </div>
-                <Link
-                  href={`/city/${selected.slug}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-medium text-cyan-50 transition-colors hover:bg-cyan-300/20"
-                >
-                  Full dossier <ExternalLink aria-hidden className="size-3.5" />
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/osint/compare?cities=${selected.cityId}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium text-slate-200 transition-colors hover:bg-white/10"
+                  >
+                    Compare
+                  </Link>
+                  <Link
+                    href={`/city/${selected.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-medium text-cyan-50 transition-colors hover:bg-cyan-300/20"
+                  >
+                    Full dossier <ExternalLink aria-hidden className="size-3.5" />
+                  </Link>
+                </div>
               </header>
 
               {detailLoading ? (
@@ -291,6 +304,9 @@ export function OsintConsole() {
               ) : (
                 <>
                   {coverage ? <CoveragePanel coverage={coverage} /> : null}
+                  {entities && entities.some((e) => e.exactSite && e.latitude != null && e.longitude != null) ? (
+                    <EntityMiniMap entities={entities} />
+                  ) : null}
                   {grouped.length > 1 ? (
                     <EntityTypeFilter grouped={grouped} active={typeFilter} onToggle={toggleType} />
                   ) : null}
