@@ -5,6 +5,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/states/empty-state";
 import { LoadingState } from "@/components/states/loading-state";
 import { assetUrl } from "@/lib/asset-url";
+import { loadEnrichmentIndex, type CityEnrichment } from "@/lib/city-data-client";
 
 type CityListing = {
   cityId: string;
@@ -22,22 +23,40 @@ export function CountryCities({ countryIso3 }: { countryIso3: string }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [enrichment, setEnrichment] = useState<Record<string, CityEnrichment>>({});
   const pageSize = 100;
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     fetch(assetUrl(`/data/countries/${countryIso3.toLowerCase()}_cities.json`))
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
+        if (cancelled) return;
         setCities(data);
         setLoading(false);
       })
       .catch((err) => {
+        if (cancelled) return;
         console.error("Failed to load cities", err);
         setCities([]);
         setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [countryIso3]);
+
+  // Slim connectivity/PM2.5 index (keyed by cityId) so the directory can surface the new
+  // source-backed enrichment alongside each city. Degrades to {} when absent.
+  useEffect(() => {
+    let cancelled = false;
+    loadEnrichmentIndex().then((e) => {
+      if (!cancelled) setEnrichment(e);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) return <LoadingState label="Indexing cities..." />;
   if (cities.length === 0) {
@@ -91,6 +110,7 @@ export function CountryCities({ countryIso3 }: { countryIso3: string }) {
               <th className="px-4 py-3 font-medium text-slate-300">City Name</th>
               <th className="px-4 py-3 font-medium text-slate-300 hidden md:table-cell">Region / ADM1</th>
               <th className="px-4 py-3 font-medium text-slate-300 hidden sm:table-cell text-right">Population</th>
+              <th className="px-4 py-3 font-medium text-slate-300 hidden lg:table-cell text-right">Fixed broadband</th>
               <th className="px-4 py-3 font-medium text-slate-300 text-right">Coordinates</th>
               <th className="px-4 py-3"></th>
             </tr>
@@ -118,6 +138,11 @@ export function CountryCities({ countryIso3 }: { countryIso3: string }) {
                 </td>
                 <td className="px-4 py-3 text-slate-300 hidden sm:table-cell text-right font-mono">
                   {city.population ? city.population.toLocaleString() : "—"}
+                </td>
+                <td className="px-4 py-3 text-slate-300 hidden lg:table-cell text-right font-mono text-[11px]">
+                  {enrichment[city.cityId]?.fixedMbps != null
+                    ? `${Math.round(enrichment[city.cityId]!.fixedMbps!)} Mbps`
+                    : "—"}
                 </td>
                 <td className="px-4 py-3 text-slate-500 text-right font-mono text-[11px]">
                   {city.latitude.toFixed(4)}, {city.longitude.toFixed(4)}
