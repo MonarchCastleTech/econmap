@@ -70,6 +70,8 @@ async function main() {
   execSync("npx tsx scripts/data/cities/build-dossier-bundle.ts", { stdio: "inherit" });
   console.log("  Building slim search index (public/data/cities/search-index.json)...");
   execSync("npx tsx scripts/data/cities/build-search-index-slim.ts", { stdio: "inherit" });
+  console.log("  Building slim enrichment index (public/data/command-center/enrichment.json)...");
+  execSync("npx tsx scripts/data/cities/build-enrichment-slim.ts", { stdio: "inherit" });
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log(`\nDone. Copy completed in ${elapsed}s.`);

@@ -12,7 +12,12 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Crosshair, Plus, X } from "lucide-react";
 
-import { loadCitySearchIndex, type CitySearchIndexEntry } from "@/lib/city-data-client";
+import {
+  loadCitySearchIndex,
+  loadEnrichmentIndex,
+  type CityEnrichment,
+  type CitySearchIndexEntry,
+} from "@/lib/city-data-client";
 import { useCityDossier } from "@/features/osint/lib/use-city-dossier";
 import { entityLabel, fmtPop } from "@/features/osint/lib/entity-display";
 
@@ -23,7 +28,18 @@ export function OsintCompare() {
   const [index, setIndex] = useState<CitySearchIndexEntry[] | null>(null);
   const [cities, setCities] = useState<CitySearchIndexEntry[]>([]);
   const [query, setQuery] = useState("");
+  const [enrichment, setEnrichment] = useState<Record<string, CityEnrichment>>({});
   const seeded = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadEnrichmentIndex().then((e) => {
+      if (!cancelled) setEnrichment(e);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Load the index and, one-shot, seed selection from ?cities=geo-1,geo-2 — both writes happen in
   // the async .then so there's no synchronous setState in the effect body.
@@ -192,6 +208,23 @@ export function OsintCompare() {
                             {d.entities.length.toLocaleString("en-US")} entities
                           </span>
                         </div>
+                        {(() => {
+                          const m = enrichment[c.cityId];
+                          if (!m || (m.fixedMbps == null && m.mobileMbps == null && m.pm25 == null)) return null;
+                          return (
+                            <div className="flex flex-wrap gap-1.5 text-[11px] text-slate-400">
+                              {m.fixedMbps != null ? (
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">Fixed {Math.round(m.fixedMbps)} Mbps</span>
+                              ) : null}
+                              {m.mobileMbps != null ? (
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">Mobile {Math.round(m.mobileMbps)} Mbps</span>
+                              ) : null}
+                              {m.pm25 != null ? (
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">PM2.5 {m.pm25} µg/m³</span>
+                              ) : null}
+                            </div>
+                          );
+                        })()}
                         <div className="flex flex-wrap gap-2 pt-1 text-xs">
                           <Link href={`/city/${c.slug}`} className="text-cyan-300 hover:text-cyan-200">
                             Full dossier
@@ -238,6 +271,56 @@ export function OsintCompare() {
                               }`}
                             >
                               {n.toLocaleString("en-US")}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+
+            {/* Connectivity & environment differential (from the slim enrichment index) */}
+            {cities.some((c) => enrichment[c.cityId]) ? (
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                <div className="border-b border-white/10 px-4 py-2.5">
+                  <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Connectivity &amp; environment</h2>
+                </div>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-slate-500">
+                      <th className="px-4 py-2 font-medium">Metric</th>
+                      {cities.map((c) => (
+                        <th key={c.cityId} className="px-4 py-2 text-right font-medium">
+                          {c.name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(
+                      [
+                        { key: "fixedMbps", label: "Fixed broadband (Mbps)", higherIsBetter: true, round: true },
+                        { key: "mobileMbps", label: "Mobile broadband (Mbps)", higherIsBetter: true, round: true },
+                        { key: "pm25", label: "PM2.5 (µg/m³ — lower better)", higherIsBetter: false, round: false },
+                      ] as const
+                    ).map((row) => {
+                      const vals = cities.map((c) => enrichment[c.cityId]?.[row.key]);
+                      const present = vals.filter((v): v is number => v != null);
+                      if (present.length === 0) return null;
+                      const best = row.higherIsBetter ? Math.max(...present) : Math.min(...present);
+                      return (
+                        <tr key={row.key} className="border-t border-white/5">
+                          <td className="px-4 py-2 text-slate-300">{row.label}</td>
+                          {vals.map((v, i) => (
+                            <td
+                              key={cities[i].cityId}
+                              className={`px-4 py-2 text-right tabular-nums ${
+                                v != null && v === best && present.length > 1 ? "font-semibold text-cyan-200" : "text-slate-400"
+                              }`}
+                            >
+                              {v == null ? "—" : row.round ? Math.round(v).toLocaleString("en-US") : v}
                             </td>
                           ))}
                         </tr>

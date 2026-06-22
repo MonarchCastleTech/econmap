@@ -137,3 +137,20 @@ export async function generateSearchIndex(): Promise<CitySearchIndexEntry[]> {
     }),
   );
 }
+
+export type CityEnrichment = { fixedMbps?: number; mobileMbps?: number; pm25?: number };
+
+let enrichmentCache: Promise<Record<string, CityEnrichment>> | null = null;
+
+/**
+ * Slim per-city connectivity + environment headline metrics, keyed by cityId, from
+ * public/data/command-center/enrichment.json (build-enrichment-slim.ts). Cached + degrades to {}.
+ */
+export async function loadEnrichmentIndex(): Promise<Record<string, CityEnrichment>> {
+  if (!enrichmentCache) {
+    enrichmentCache = fetch(`${assetUrl("/data/command-center")}/enrichment.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<Record<string, CityEnrichment>>) : {}))
+      .catch(() => ({}));
+  }
+  return enrichmentCache;
+}

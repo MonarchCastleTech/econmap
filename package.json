@@ -17,6 +17,7 @@
     "data:cities:globe": "tsx scripts/data/cities/generate-globe-artifacts.ts",
     "data:cities:bundle": "tsx scripts/data/cities/build-dossier-bundle.ts",
     "data:cities:search-slim": "tsx scripts/data/cities/build-search-index-slim.ts",
+    "data:cities:enrichment-slim": "tsx scripts/data/cities/build-enrichment-slim.ts",
     "data:cities:refresh-featured": "tsx scripts/data/cities/refresh-featured-city-intel.ts",
     "data:cities:download-enrichment": "node scripts/data/cities/download-enrichment-sources.mjs",
     "data:globe:download": "tsx scripts/data/globe/download-gibs-imagery.ts",
