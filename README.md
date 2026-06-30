@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/logo.png" alt="EconMap logo" width="140"/>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/monarchcastletech/econmap/main/docs/logo-dark.png"><img src="docs/logo.png" alt="EconMap logo" width="140"></picture>
   <!-- CODEX: generate a clean, modern product logo for "EconMap" — a dark-navy, intelligence-grade economic atlas. Motif: a stylized map pin or globe meridian fused with a rising bar/line chart, in deep navy (#0b1f3a) with a single accent (electric blue #1f6feb). Flat, geometric, no gradient noise, transparent background, square-safe at 140px. -->
 
   # EconMap
