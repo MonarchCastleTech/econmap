@@ -27,10 +27,10 @@
 <!-- CODEX: capture real product screenshots from the live site (https://monarchcastletech.github.io/econmap/) and drop them into docs/. -->
 
 <!-- CODEX: screenshot-1 — the main map-first analyst shell (dark theme, MapLibre globe/map with city/country markers, filter rail, and a country/city drawer open). Save as docs/screenshot-1.png, ~1600px wide. -->
-![EconMap — map-first analyst shell](docs/screenshot-1.png)
+<!-- ![EconMap — map-first analyst shell](docs/screenshot-1.png) (screenshot pending) -->
 
 <!-- CODEX: screenshot-2 — a city or country workspace detail view (factbook tabs: overview / trade / demographics / risk / forecast / methodology, with charts and source/confidence badges visible). Save as docs/screenshot-2.png, ~1600px wide. -->
-![EconMap — city / country workspace detail](docs/screenshot-2.png)
+<!-- ![EconMap — city / country workspace detail](docs/screenshot-2.png) (screenshot pending) -->
 
 ## 🧭 What it does
 EconMap presents economic intelligence as a navigable map rather than a wall of tables. The map is the primary surface; charts, factbooks, and intelligence panels exist to explain what is on the map.
