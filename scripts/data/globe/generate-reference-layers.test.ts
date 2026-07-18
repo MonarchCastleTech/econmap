@@ -9,6 +9,13 @@ const ROOT_DIR = process.cwd();
 const CITY_FOOTPRINT_DIR = path.join(ROOT_DIR, "public", "data", "globe", "reference", "city-footprints");
 const CITY_FOOTPRINT_CATALOG_FILE = path.join(CITY_FOOTPRINT_DIR, "catalog.json");
 const CITY_FOOTPRINT_SELECTION_FILE = path.join(CITY_FOOTPRINT_DIR, "selectable.geojson");
+const NATURAL_EARTH_DIR = path.join(ROOT_DIR, "data", "raw", "cities", "bulk", "naturalearth");
+const hasNaturalEarthCache = [
+  ["ne_10m_admin_0_countries", "ne_10m_admin_0_countries.shp"],
+  ["ne_10m_admin_1_states_provinces", "ne_10m_admin_1_states_provinces.shp"],
+  ["ne_10m_populated_places", "ne_10m_populated_places.shp"],
+  ["ne_10m_urban_areas", "ne_10m_urban_areas.shp"],
+].every(([directory, file]) => fs.existsSync(path.join(NATURAL_EARTH_DIR, directory, file)));
 const execFileAsync = promisify(execFile);
 
 function readJsonFile<T>(filePath: string) {
@@ -16,7 +23,8 @@ function readJsonFile<T>(filePath: string) {
 }
 
 describe("generate-reference-layers", () => {
-  it(
+  const externalCacheTest = hasNaturalEarthCache ? it : it.skip;
+  externalCacheTest(
     "publishes political city selection assets for major cities and excludes district noise",
     async () => {
       await execFileAsync("python", ["scripts/data/globe/generate-reference-layers.py"], {

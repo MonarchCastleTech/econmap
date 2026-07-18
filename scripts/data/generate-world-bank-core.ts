@@ -45,11 +45,32 @@ const directIndicators: IndicatorFetchConfig[] = [
 ];
 
 async function fetchIndicator(config: IndicatorFetchConfig) {
-  const url = `https://api.worldbank.org/v2/country/${countryCodes}/indicator/${config.code}?format=json&per_page=20000`;
-  const response = await fetch(url);
+  const url =
+    `https://api.worldbank.org/v2/country/${countryCodes}/indicator/${config.code}` +
+    `?format=json&per_page=20000&date=${historyYears[0]}:${historyYears.at(-1)}`;
+  let response: Response | undefined;
+  const attempts = 5;
 
-  if (!response.ok) {
-    throw new Error(`World Bank request failed for ${config.id}: ${response.status}`);
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "econmap-world-bank-generator/1.0",
+      },
+    });
+    if (response.ok) {
+      break;
+    }
+    if (attempt === attempts || ![400, 408, 429, 500, 502, 503, 504].includes(response.status)) {
+      throw new Error(
+        `World Bank request failed for ${config.id}: ${response.status} after ${attempt} attempt(s)`,
+      );
+    }
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, 750 * 2 ** (attempt - 1)));
+  }
+
+  if (!response?.ok) {
+    throw new Error(`World Bank request failed for ${config.id}: no successful response`);
   }
 
   const payload = (await response.json()) as [

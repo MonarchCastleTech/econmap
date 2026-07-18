@@ -5,6 +5,7 @@ const root = resolve(import.meta.dirname, "..");
 const required = [
   "src/data/generated/world-bank-core.json",
   "src/data/generated/cities/manifest.json",
+  "src/data/generated/cities/slug-meta.json",
   "src/data/generated/command-center/manifest.json",
   "public/data/command-center/manifest.json",
   "public/data/globe/manifest.json",
@@ -20,8 +21,12 @@ if (missing.length > 0) {
   console.error("");
   console.error("Reproduce them from reviewed upstream sources:");
   console.error("  1. npm run data:generate-core");
-  console.error("  2. npm run data:cities:download-bulk -- --optional");
-  console.error("  3. npm run data:cities");
+  console.error("  2. npm run data:generate-countries");
+  console.error("  3. npm run data:cities:download-bulk -- --optional");
+  console.error("  4. npm run data:cities");
+  console.error("");
+  console.error("Or restore the pinned, checksum-verified reviewed release cache:");
+  console.error("  npm run data:restore-release-cache");
   console.error("");
   console.error("See docs/data/local-verification-prerequisites.md for source and storage boundaries.");
   process.exit(1);

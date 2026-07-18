@@ -24,6 +24,7 @@ import { pipeline } from "node:stream/promises";
 const execFileAsync = promisify(execFile);
 const BULK_ROOT = path.join(process.cwd(), "data", "raw", "cities", "bulk");
 const wantOptional = process.argv.includes("--optional");
+const DOWNLOAD_TIMEOUT_MS = 110_000;
 
 /** @typedef {{ kind: "file", url: string, dest: string }} FileJob */
 /** @typedef {{ kind: "zip", url: string, extractDir: string, expect: string[] }} ZipJob */
@@ -51,10 +52,26 @@ const REQUIRED = [
 
 /** @type {(FileJob|ZipJob)[]} */
 const OPTIONAL = [
-  z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_0_countries.zip", "naturalearth", ["ne_10m_admin_0_countries.shp"]),
-  z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip", "naturalearth", ["ne_10m_admin_1_states_provinces.shp"]),
-  z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_populated_places.zip", "naturalearth", ["ne_10m_populated_places.shp"]),
-  z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_urban_areas.zip", "naturalearth", ["ne_10m_urban_areas.shp"]),
+  z(
+    "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_0_countries.zip",
+    "naturalearth/ne_10m_admin_0_countries",
+    ["ne_10m_admin_0_countries.shp"],
+  ),
+  z(
+    "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip",
+    "naturalearth/ne_10m_admin_1_states_provinces",
+    ["ne_10m_admin_1_states_provinces.shp"],
+  ),
+  z(
+    "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_populated_places.zip",
+    "naturalearth/ne_10m_populated_places",
+    ["ne_10m_populated_places.shp"],
+  ),
+  z(
+    "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_urban_areas.zip",
+    "naturalearth/ne_10m_urban_areas",
+    ["ne_10m_urban_areas.shp"],
+  ),
 ];
 
 function f(/** @type {string} */ url, /** @type {string} */ rel) {
@@ -81,10 +98,19 @@ async function download(/** @type {string} */ url, /** @type {string} */ dest) {
   await fs.mkdir(path.dirname(dest), { recursive: true });
   const tmp = `${dest}.part`;
   log(`GET ${url}`);
-  const res = await fetch(url, { redirect: "follow", headers: { "user-agent": "econmap-bulk-downloader/1.0" } });
-  if (!res.ok || !res.body) throw new Error(`HTTP ${res.status} for ${url}`);
-  await pipeline(Readable.fromWeb(/** @type {any} */ (res.body)), createWriteStream(tmp));
-  await fs.rename(tmp, dest);
+  try {
+    const res = await fetch(url, {
+      redirect: "follow",
+      headers: { "user-agent": "econmap-bulk-downloader/1.0" },
+      signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+    });
+    if (!res.ok || !res.body) throw new Error(`HTTP ${res.status} for ${url}`);
+    await pipeline(Readable.fromWeb(/** @type {any} */ (res.body)), createWriteStream(tmp));
+    await fs.rename(tmp, dest);
+  } catch (error) {
+    await fs.rm(tmp, { force: true });
+    throw error;
+  }
   const { size } = await fs.stat(dest);
   log(`saved ${path.relative(process.cwd(), dest)} (${(size / 1e6).toFixed(1)} MB)`);
 }
