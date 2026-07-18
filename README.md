@@ -128,3 +128,93 @@ gh release create site-$(date +%Y%m%d) econmap-site.tar.gz
 See `LICENSE`. © 2026 Monarch Castle Holdings · Ankara, Türkiye.
 
 <div align="center"><sub>🏰 Monarch Castle Holdings — turning open-source noise into lawful, verified, decision-grade intelligence.</sub></div>
+
+---
+
+<!-- repository-hygiene:start -->
+
+![Monarch Castle Technologies approved lockup](docs/brand/organization-lockup.png)
+
+Source-backed, city-first OSINT economic atlas — a dark, map-first economic intelligence app. Financial Intelligence, Monarch Castle Technologies.
+
+![Lifecycle: Active](docs/lifecycle-active.svg)
+
+## Repository status
+
+Lifecycle: **Active**. The badge and this statement describe maintenance status, not service availability.
+
+## Public access
+
+[Open the published project](https://monarchcastle.tech/econmap/)
+
+## Screenshots
+
+![EconMap repository preview](docs/social-preview.png)
+
+The preview is maintained as a repository asset; the live interface or generated output remains authoritative.
+
+## Data and methodology
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the implementation files in this repository. Source dates, transformation steps, and known gaps must travel with analytical outputs.
+
+## Update frequency
+
+Source-dependent. City and macroeconomic artifacts are rebuilt when upstream releases are reviewed and ingested.
+
+## Quick start
+
+```shell
+npm ci
+```
+
+```shell
+npm run dev
+```
+
+Run only in a trusted development environment and review repository-specific prerequisites before using networked or hardware features.
+
+## Architecture
+
+- `%USERPROFILE%/` — implementation or data module.
+- `CITATION.cff` — repository entry point or configuration.
+- `citydata-bulk-source-matrix.md` — repository entry point or configuration.
+- `citydata.md` — repository entry point or configuration.
+- `convo.md` — repository entry point or configuration.
+- `data.md` — repository entry point or configuration.
+- `deployment-plan.md` — repository entry point or configuration.
+
+## Tests
+
+```shell
+npm test
+```
+
+```shell
+npm run typecheck
+```
+
+## Provenance
+
+Original software history is maintained in Git. External datasets, reports, trademarks, screenshots, and assets are not relicensed by this repository; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before reuse.
+
+## Forecast limitations
+
+This repository does not publish a guaranteed forecast. Any scenarios, scores, or forward-looking language are analytical aids, not facts or advice; review source dates and methodology before use.
+
+## Security
+
+Do not publish vulnerabilities in an issue. Use GitHub's private vulnerability-reporting flow when available, or follow the [organization security policy](https://github.com/MonarchCastleTech/.github/security/policy).
+
+## License
+
+Original repository code and documentation are available under **MIT**; see [LICENSE](LICENSE). That license does not override third-party terms documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Citation
+
+Use the machine-readable [CITATION.cff](CITATION.cff). Cite the specific commit and, for analytical use, record the data or model snapshot date.
+
+## Masterbrand endorsement
+
+EconMap is a Monarch Castle Technologies project. **Part of Monarch Castle Technologies.**
+
+<!-- repository-hygiene:end -->
