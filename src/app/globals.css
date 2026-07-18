@@ -5,46 +5,60 @@
 @source not "../../docs/**";
 
 :root {
-  /* Base — deep, slightly-blue intelligence dark */
-  --background: #05070d;
-  --background-2: #070a12;
-  --foreground: #e6ecf3;
-  --foreground-muted: #9aa6b6;
+  /* Canonical Monarch Castle portfolio tokens, mapped into EconMap's existing aliases. */
+  --portfolio-background: #15130f;
+  --portfolio-panel: #191711;
+  --portfolio-panel-soft: #1f1c16;
+  --portfolio-card: #17140f;
+  --portfolio-border: #2c2820;
+  --portfolio-border-soft: #221f18;
+  --portfolio-border-strong: #463f31;
+  --portfolio-text-primary: #ece6d8;
+  --portfolio-text-secondary: #9a9284;
+  --portfolio-text-muted: #7d7565;
+  --portfolio-accent: #c9a24b;
+  --portfolio-accent-soft: rgba(201, 162, 75, 0.12);
+  --portfolio-critical: #cf5b4e;
+  --portfolio-elevated: #d8a13f;
+  --portfolio-stable: #6fae7e;
+  --portfolio-font-serif: "Spectral", Georgia, serif;
+  --portfolio-font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --portfolio-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --portfolio-radius: 1px;
+  --portfolio-shadow: 0 18px 54px rgba(0, 0, 0, 0.24);
+  --portfolio-brand-gap: 14px;
 
-  --surface: rgba(15, 21, 32, 0.92);
-  --surface-muted: rgba(13, 18, 28, 0.66);
-  --border: rgba(148, 167, 196, 0.16);
-  --border-strong: rgba(148, 167, 196, 0.3);
-
-  /* Accents — refined sage "field" + cool cyan "signal" */
-  --accent: #b4c98a;
-  --accent-soft: rgba(180, 201, 138, 0.16);
-  --signal: #57d0e0;
-  --signal-soft: rgba(87, 208, 224, 0.14);
-
-  /* Semantic (verified / presence / partial / alert) */
-  --ok: #4ade80;
-  --info: #60a5fa;
-  --warn: #fbbf24;
-  --alert: #fb7185;
-
-  /* Tactical surfaces — keep the technical signature, add depth + a hairline top highlight */
-  --tactical-border: rgba(86, 99, 80, 0.5);
-  --tactical-border-strong: rgba(180, 201, 138, 0.34);
-  --tactical-panel-fill: linear-gradient(180deg, rgba(16, 21, 24, 0.96), rgba(10, 13, 16, 0.93));
-  --tactical-panel-fill-strong: linear-gradient(180deg, rgba(22, 28, 24, 0.97), rgba(12, 15, 14, 0.94));
-  --tactical-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.35);
-
-  --font-inter: "Inter";
+  --background: var(--portfolio-background);
+  --background-2: var(--portfolio-card);
+  --foreground: var(--portfolio-text-primary);
+  --foreground-muted: var(--portfolio-text-secondary);
+  --surface: var(--portfolio-panel);
+  --surface-muted: var(--portfolio-panel-soft);
+  --border: var(--portfolio-border);
+  --border-strong: var(--portfolio-border-strong);
+  --accent: var(--portfolio-accent);
+  --accent-soft: var(--portfolio-accent-soft);
+  --signal: var(--portfolio-stable);
+  --signal-soft: rgba(111, 174, 126, 0.12);
+  --ok: var(--portfolio-stable);
+  --info: var(--portfolio-accent);
+  --warn: var(--portfolio-elevated);
+  --alert: var(--portfolio-critical);
+  --tactical-border: var(--portfolio-border);
+  --tactical-border-strong: var(--portfolio-border-strong);
+  --tactical-panel-fill: linear-gradient(180deg, var(--portfolio-panel), var(--portfolio-card));
+  --tactical-panel-fill-strong: linear-gradient(180deg, var(--portfolio-panel-soft), var(--portfolio-panel));
+  --tactical-shadow: var(--portfolio-shadow);
+  --font-inter: "IBM Plex Sans";
   --font-mono: "IBM Plex Mono";
-  --font-display: "Inter";
+  --font-display: "Spectral";
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: var(--portfolio-font-sans);
+  --font-mono: var(--portfolio-font-mono);
 }
 
 * {
@@ -59,7 +73,9 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: var(--portfolio-font-sans);
+  font-size: 15px;
+  line-height: 1.5;
   font-feature-settings: "cv03", "cv04", "ss01";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -92,10 +108,45 @@ body {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--tactical-border);
-  border-radius: 4px;
+  border-radius: var(--portfolio-radius);
   background: var(--tactical-panel-fill);
   box-shadow: var(--tactical-shadow);
   backdrop-filter: blur(18px) saturate(120%);
+}
+
+.portfolio-lockup {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  gap: var(--portfolio-brand-gap);
+}
+
+.portfolio-product-name {
+  color: var(--portfolio-text-primary);
+  font-family: var(--portfolio-font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.portfolio-endorsement {
+  margin-top: 0.25rem;
+  color: var(--portfolio-text-secondary);
+  font-family: var(--portfolio-font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .portfolio-lockup {
+    min-height: 48px;
+  }
+
+  .portfolio-product-name {
+    font-size: 1.125rem;
+  }
 }
 /* hairline top highlight = premium depth */
 .tactical-panel::after,

@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -294,5 +297,18 @@ describe("app/page", () => {
     render(await Home());
 
     expect(screen.getByTestId("home-shell-props").textContent ?? "").not.toContain("activeSurfaceMode");
+  });
+
+  it("maps the canonical portfolio tokens and mobile breakpoint through the existing stylesheet", () => {
+    const css = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
+
+    expect(css).toContain("--portfolio-background: #15130f");
+    expect(css).toContain("--portfolio-panel: #191711");
+    expect(css).toContain("--portfolio-border: #2c2820");
+    expect(css).toContain("--portfolio-text-primary: #ece6d8");
+    expect(css).toContain("--portfolio-accent: #c9a24b");
+    expect(css).toContain('--portfolio-font-serif: "Spectral", Georgia, serif');
+    expect(css).toContain("--portfolio-radius: 1px");
+    expect(css).toMatch(/@media\s*\(max-width:\s*640px\)/);
   });
 });

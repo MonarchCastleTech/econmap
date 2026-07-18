@@ -17,7 +17,7 @@
 ## ✨ Highlights
 - **City-first global atlas.** Select any city on the map to open a dedicated workspace — economic factbook, investor and site-selection signals, urban intelligence, and entity presence, with the map as the primary surface.
 - **Country factbooks.** Per-country views spanning overview, trade, demographics, risk, forecast, and a transparent methodology tab.
-- **Source-backed observations.** Annual country indicators are built from a checked-in World Bank snapshot; the global city layer is resolved from authoritative bulk sources (GeoNames, OurAirports, UN/LOCODE) with strict attribution.
+- **Source-backed observations.** Annual country indicators are built locally from a reproducible World Bank snapshot; the global city layer is resolved from authoritative bulk sources (GeoNames, OurAirports, UN/LOCODE) with strict attribution.
 - **Provenance-first by design.** Every nontrivial field carries source and confidence; unverified data is stored explicitly as `null` / `unknown` / `not_covered_yet` — never fabricated, inferred, or interpolated.
 - **Analyst tooling.** Compare, rankings, an indicator library, corridors, datasets browser, dashboards, reports, and story mode — with CSV export across the relevant views.
 - **A published data audit gate.** A repeatable data audit (`audit:data`) must pass before a build is allowed to publish.
@@ -50,7 +50,7 @@ Compare (normalized multi-entity comparison with radar/bar charts and CSV export
 ## 🗂️ Data & provenance
 EconMap is built on the Monarch Castle doctrine of **evidence before assertion**. Provenance is a product feature, not an afterthought.
 
-- **Country observations** are derived from a checked-in **World Bank** snapshot (`src/data/generated/world-bank-core.json`), regenerable via `npm run data:generate-core`. Derived metrics (e.g. GDP per capita, business-climate composites) are computed transparently inside the app from those source-backed observations.
+- **Country observations** are derived from a locally generated **World Bank** snapshot (`src/data/generated/world-bank-core.json`), regenerable via `npm run data:generate-core`. The artifact is intentionally ignored by Git; see [local verification prerequisites](docs/data/local-verification-prerequisites.md). Derived metrics (e.g. GDP per capita, business-climate composites) are computed transparently inside the app from those source-backed observations.
 - **The global city layer** is produced by a standalone pipeline that resolves a canonical record for cities worldwide from authoritative bulk sources — **GeoNames** (identity, coordinates, population, admin hierarchy, multilingual names), **OurAirports** (airports, runways, scheduled service), and **UN/LOCODE** (ports and transport nodes), among others — written into app-readable JSON/GeoJSON artifacts.
 - **High-confidence data only.** The pipeline does **not** fabricate, infer, guess, interpolate, or hallucinate city facts, company presence, or facility locations. Any field that cannot be verified from a credible source is stored explicitly as `null`, `unknown`, or `not_covered_yet`.
 - **Attribution + confidence on every nontrivial field**, with last-verified dates surfaced in the UI as coverage badges.
@@ -95,9 +95,14 @@ npm run dev                 # http://localhost:3000
 
 ### Refreshing data
 ```bash
-npm run data:generate-core  # refresh the checked-in World Bank snapshot
+npm run data:generate-core  # refresh the local World Bank snapshot
+npm run data:cities:download-bulk -- --optional
 npm run data:cities         # run the global city data pipeline
 ```
+
+These commands require the reviewed upstream sources. Missing artifacts stop
+tests/builds clearly; EconMap does not generate substitute data. See
+[local verification prerequisites](docs/data/local-verification-prerequisites.md).
 
 ### Verification
 ```bash

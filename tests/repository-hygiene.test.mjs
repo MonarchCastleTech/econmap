@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
-import test from "node:test";
+import { test } from "vitest";
 
 const root = resolve(import.meta.dirname, "..");
 const readmePath = resolve(root, "README.md");

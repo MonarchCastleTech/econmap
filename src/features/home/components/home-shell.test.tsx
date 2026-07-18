@@ -621,10 +621,18 @@ describe("HomeShell", () => {
     expect(screen.getAllByText(/^utilities$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^organizations$/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/^dataset explorer$/i)).toBeInTheDocument();
-    expect(screen.queryByTestId("tactical-control-cluster")).not.toBeInTheDocument();
+    expect(screen.getByRole("banner", { name: /econmap product identity/i })).toBeInTheDocument();
+    expect(screen.getByText(/^econmap$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^part of monarch castle technologies$/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^methodology$/i })).toHaveAttribute("href", "/indicators");
+    expect(screen.getByRole("link", { name: /^provenance$/i })).toHaveAttribute("href", "/datasets");
+    expect(screen.getByTestId("tactical-control-cluster")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: /map controls/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/reset camera/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/toggle fullscreen/i)).toBeInTheDocument();
+    expect(screen.getByTestId("tactical-command-rail-frame")).toHaveClass("sm:right-auto", "sm:w-[340px]");
     expect(screen.queryByText(/^timeline$/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/toggle timeline/i)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/reset camera/i)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^open full city dossier$/i })).toBeInTheDocument();
     // Real ON/OFF layer toggles for published layers.
     expect(screen.getAllByText(/^on$/i).length).toBeGreaterThan(0);

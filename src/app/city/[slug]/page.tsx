@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { CityPageClient } from "./city-page-client";
-import { loadCitySlugMeta } from "@/lib/city-data";
+import { loadCityManifest, loadCitySlugMeta } from "@/lib/city-data";
 import { selectPrerenderSlugs } from "@/lib/city-prerender";
 
 type PageProps = {
@@ -15,12 +15,17 @@ type PageProps = {
 // Uses the slim slug-meta map (~11MB) rather than the full registry (113MB) so the
 // static-export workers don't hold ~500MB resident per worker (which OOM'd).
 export async function generateStaticParams() {
-  const slugMeta = await loadCitySlugMeta();
+  const [manifest, slugMeta] = await Promise.all([loadCityManifest(), loadCitySlugMeta()]);
   const entries = Object.entries(slugMeta).map(([slug, meta]) => ({
     slug,
     population: meta.p,
   }));
-  // Empty registry (fresh clone, no data) → [] without crashing.
+  if (!manifest || manifest.totalCityCount <= 0 || entries.length === 0) {
+    throw new Error(
+      "Verified city manifest/slug metadata is missing. Run the reviewed city pipeline "
+        + "or `npm run data:restore-release-cache` before building.",
+    );
+  }
   return selectPrerenderSlugs(entries).map((slug) => ({ slug }));
 }
 
