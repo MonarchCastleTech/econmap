@@ -22,6 +22,7 @@ import {
   type TacticalSidebarSelectedCityIntel,
 } from "@/features/home/components/layout/tactical-sidebar";
 import { InfosPanel, type InfosPanelProps } from "@/features/home/components/layout/infos-panel";
+import { TopControlCluster } from "@/features/home/components/layout/top-control-cluster";
 import {
   buildAnalystSidebarSections,
   buildBaseImageryOptions,
@@ -1252,6 +1253,7 @@ export function HomeStage({
         className="pointer-events-none relative z-20 min-h-screen p-3 lg:p-4"
       >
         <div
+          data-testid="tactical-command-rail-frame"
           onClickCapture={handleRailClick}
           onSubmitCapture={handleRailSubmit}
           className="pointer-events-auto absolute bottom-3 left-3 right-3 top-3 w-auto sm:right-auto sm:w-[340px] lg:w-[380px]"
@@ -1281,7 +1283,10 @@ export function HomeStage({
           />
         </div>
 
-        <div className="pointer-events-auto absolute right-3 top-3">
+        <div className="pointer-events-auto absolute right-3 top-3 flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-3">
+          <nav aria-label="Map controls" className="max-w-full overflow-x-auto">
+            <TopControlCluster />
+          </nav>
           <InfosPanel {...infosPanel} />
         </div>
       </div>

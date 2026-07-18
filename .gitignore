@@ -54,6 +54,9 @@ prisma/*.db-journal
 .codex-output/
 *.log
 
+# Guard against tools persisting an unexpanded Windows home variable in the repository.
+/%USERPROFILE%/
+
 # --- Generated & served data (regenerable via the data pipeline; large — keep out of source git) ---
 /public/data/
 /public/vendor/

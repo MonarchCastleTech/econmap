@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -299,7 +300,7 @@ describe("app/page", () => {
   });
 
   it("maps the canonical portfolio tokens and mobile breakpoint through the existing stylesheet", () => {
-    const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
+    const css = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
 
     expect(css).toContain("--portfolio-background: #15130f");
     expect(css).toContain("--portfolio-panel: #191711");

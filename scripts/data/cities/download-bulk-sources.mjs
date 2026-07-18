@@ -16,7 +16,6 @@
 import { createWriteStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import os from "node:os";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { Readable } from "node:stream";
@@ -52,6 +51,8 @@ const REQUIRED = [
 
 /** @type {(FileJob|ZipJob)[]} */
 const OPTIONAL = [
+  z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_0_countries.zip", "naturalearth", ["ne_10m_admin_0_countries.shp"]),
+  z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip", "naturalearth", ["ne_10m_admin_1_states_provinces.shp"]),
   z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_populated_places.zip", "naturalearth", ["ne_10m_populated_places.shp"]),
   z("https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_urban_areas.zip", "naturalearth", ["ne_10m_urban_areas.shp"]),
 ];

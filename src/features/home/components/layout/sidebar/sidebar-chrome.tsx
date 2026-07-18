@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Database, Keyboard, PanelLeftClose } from "lucide-react";
+import { BookOpenText, Database, Fingerprint, Keyboard, PanelLeftClose } from "lucide-react";
 
 type SidebarHeaderProps = {
   viewLabel: string;
@@ -13,16 +13,20 @@ export function SidebarHeader({ viewLabel, onCollapse }: SidebarHeaderProps) {
   return (
     <div className="border-b border-[#232825] pb-3">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="signal-dot" />
-            <p className="eyebrow">Command rail · live</p>
+        <header
+          role="banner"
+          aria-label="EconMap product identity"
+          className="portfolio-lockup min-w-0"
+        >
+          <span className="signal-dot shrink-0" aria-hidden />
+          <div className="min-w-0">
+            <p className="portfolio-product-name">EconMap</p>
+            <p className="portfolio-endorsement">Part of Monarch Castle Technologies</p>
+            <p className="mt-1 truncate text-[10px] uppercase tracking-[0.2em] text-slate-500">
+              Command rail · live · {viewLabel}
+            </p>
           </div>
-          <p className="mt-1.5 text-[12px] font-bold uppercase tracking-[0.18em] text-slate-200">
-            MapFactbook
-          </p>
-          <p className="mt-1 truncate text-[11px] uppercase tracking-[0.2em] text-slate-500">{viewLabel}</p>
-        </div>
+        </header>
         <button
           type="button"
           onClick={onCollapse}
@@ -45,6 +49,22 @@ type SidebarFooterProps = {
 export function SidebarFooter({ datasetWorkspaceSummary, onOpenShortcuts }: SidebarFooterProps) {
   return (
     <div className="space-y-1.5 border-t border-[#232825] pt-3">
+      <nav aria-label="Methodology and provenance" className="grid grid-cols-2 gap-1.5">
+        <Link
+          href="/indicators"
+          className="tactical-chip flex min-w-0 items-center gap-1.5 px-2 py-2 text-[10px]"
+        >
+          <BookOpenText aria-hidden className="size-3.5 shrink-0" />
+          Methodology
+        </Link>
+        <Link
+          href="/datasets"
+          className="tactical-chip flex min-w-0 items-center gap-1.5 px-2 py-2 text-[10px]"
+        >
+          <Fingerprint aria-hidden className="size-3.5 shrink-0" />
+          Provenance
+        </Link>
+      </nav>
       <Link
         href={datasetWorkspaceSummary.href}
         className="flex items-center gap-2 rounded-lg border border-[#272c29] bg-[#0f1112] px-2.5 py-2 transition hover:border-[#3b4334]"
