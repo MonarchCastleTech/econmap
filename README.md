@@ -155,7 +155,9 @@ The preview is maintained as a repository asset; the live interface or generated
 
 ## Data and methodology
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the implementation files in this repository. Source dates, transformation steps, and known gaps must travel with analytical outputs.
+- [scripts/data/](scripts/data/)
+
+These repository-specific sources define the methodology or provenance boundary. Source dates, transformation steps, and known gaps must travel with analytical outputs.
 
 ## Update frequency
 
@@ -175,13 +177,8 @@ Run only in a trusted development environment and review repository-specific pre
 
 ## Architecture
 
-- `%USERPROFILE%/` — implementation or data module.
-- `CITATION.cff` — repository entry point or configuration.
-- `citydata-bulk-source-matrix.md` — repository entry point or configuration.
-- `citydata.md` — repository entry point or configuration.
-- `convo.md` — repository entry point or configuration.
-- `data.md` — repository entry point or configuration.
-- `deployment-plan.md` — repository entry point or configuration.
+- `src/` — repository-specific implementation, data, or configuration boundary.
+- `scripts/data/` — repository-specific implementation, data, or configuration boundary.
 
 ## Tests
 
