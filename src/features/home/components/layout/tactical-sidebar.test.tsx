@@ -57,6 +57,13 @@ function renderFreshClone() {
 }
 
 describe("TacticalSidebar (tactical command rail v2)", () => {
+  it("renders the official EconMap dark lockup in the command rail", () => {
+    renderFreshClone();
+    const logo = screen.getByRole("img", { name: "EconMap" });
+    expect(logo).toHaveAttribute("src", "/logo-dark.png");
+    expect(logo).toHaveClass("h-10", "w-auto", "object-contain");
+  });
+
   it("keeps the mission-console smoke attribute", () => {
     renderFreshClone();
     expect(screen.getByTestId("tactical-command-rail")).toHaveAttribute("data-layout", "mission-console");

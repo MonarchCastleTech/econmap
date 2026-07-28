@@ -18,14 +18,14 @@ export function SidebarHeader({ viewLabel, onCollapse }: SidebarHeaderProps) {
           aria-label="EconMap product identity"
           className="portfolio-lockup min-w-0"
         >
-          <span className="signal-dot shrink-0" aria-hidden />
-          <div className="min-w-0">
-            <p className="portfolio-product-name">EconMap</p>
-            <p className="portfolio-endorsement">Part of Monarch Castle Technologies</p>
-            <p className="mt-1 truncate text-[10px] uppercase tracking-[0.2em] text-slate-500">
-              Command rail · live · {viewLabel}
-            </p>
-          </div>
+          <img
+            src="/logo-dark.png"
+            alt="EconMap"
+            className="h-10 w-auto max-w-[11rem] shrink-0 object-contain"
+          />
+          <p className="mt-1 truncate text-[10px] uppercase tracking-[0.2em] text-slate-500">
+            Command rail · live · {viewLabel}
+          </p>
         </header>
         <button
           type="button"
