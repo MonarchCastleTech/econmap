@@ -22,21 +22,29 @@ The interactive map + **trustworthy, source-attributed economic/city intelligenc
 - ✓ **REQ-03/04** Static export + client/map runtime optimized (dead-dep removal, top-N pre-render, code-splitting) — v1.0 Phase 2
 - ✓ **REQ-05/06** Minor cities degrade gracefully; raw coverage expanded via scoped pipeline (191,845 / 7,310) — v1.0 Phase 3
 - ✓ **TILE-01/02** Globe layers served from a 1.2 MB range-addressable PMTiles archive (replaces 272 MB geojson tree) — v1.1 Phase 4
+- ✓ **COVER-01/02/03** Enrichment expanded to 9,235 cities / 119,020 entities with explicit gaps — v1.1 Phase 5
 
-## Current Milestone: v1.1 — Deferred follow-up
+## Current Milestone: v1.3 - Global city completeness and OSINT honesty
 
-**Goal:** Close the items deferred at the end of v1.0 — pack globe vector tiles (PMTiles) and expand
-city-intel coverage — while dropping the unworkable Brotli idea.
+**Goal:** Represent every registry city, distinguish cities from subordinate places and regions, process
+the full registry resumably, and expose source-backed OSINT observations with honest coverage states.
 
 **Target features:**
-- Globe PMTiles packing (Phase 4) — **done 2026-06-21**
-- Full city enrichment coverage (Phase 5) — **executed 2026-06-21**: 9,235 cities / 119,020 entities / 5 sources / 9 globe layers; `audit:data` 5/5. Residual gap is portal-only manual data (OECD/WPI/GHSL/Aqueduct/Carbon Monitor/GLEIF).
+- City/subordinate-place/region ontology and canonical identity crosswalk.
+- Deterministic full-registry processing with checkpoints and a coverage report.
+- Source-availability contracts plus place-of-worship and priority civic/infrastructure observations.
+- A city profile and grouped search experience that expose provenance and explicit gaps.
+- Regression fixtures and release audit for requested cities and counterexamples.
 
-### Validated (v1.1)
+### Completed (v1.3)
 
-- ✓ **COVER-01** One-command enrichment downloader (`download-enrichment-sources.mjs`) — AUTO sources pulled
-- ✓ **COVER-02** Coverage expanded: 7,310 → **9,235 cities**, 19,042 → **119,020 entities**, 3 → **5 sources** (WRI power + ROR universities resolved; Ookla connectivity + WHO air quality enrichment). Economy via Eurostat staged (needs OECD crosswalk — manual)
-- ✓ **COVER-03** New fields source-backed; `audit:data` 5/5 PASS; gaps stay explicit `not_covered_yet`
+- Phase 6: city ontology and identity.
+- Phase 7: full-registry processing and coverage report.
+- Phase 8: OSINT source catalog and observations.
+- Phase 9: city profile and search experience.
+- Phase 10: global verification and data audit.
+- Final release: 192,445 populated-place source records, 95,915 searchable canonical cities,
+  42,873 source-observed dossiers, and 53,042 registry-only baseline dossiers.
 
 ### Out of Scope
 
@@ -48,7 +56,7 @@ city-intel coverage — while dropping the unworkable Brotli idea.
 ## Context
 
 - **Stack**: Next.js (App Router, `output: "export"`) + TypeScript, Tailwind + shadcn/ui, Zustand, TanStack Query, MapLibre GL JS + PMTiles, Recharts, Framer Motion, Prisma + SQLite (scaffold only), Zod.
-- **Data**: All generated data (`src/data/generated/`, `public/data/`) is gitignored and produced by `scripts/data/cities/*` + `scripts/data/globe/*` from external bulk sources. Latest audit (2026-06-17): 189,025 cities, 87,846 processed, 629.8 MB across 119,115 files.
+- **Data**: Generated data (`src/data/generated/`, `public/data/`) is produced by `scripts/data/cities/*` and `scripts/data/globe/*` from external bulk sources. Latest audit (2026-07-28): 95,915 canonical cities, 42,873 source-observed dossiers, 53,042 registry-only baselines, and zero unsourced entities.
 - **The left menu** lives in `src/features/home/components/layout/tactical-sidebar.tsx`.
 - **User feedback themes** (this engagement): "left menu is not even close to useful", "website is not optimized", "lots of missing data for minor cities".
 
@@ -71,4 +79,4 @@ city-intel coverage — while dropping the unworkable Brotli idea.
 | Drop Brotli dossier shards | Browser can't decode `br`; gzip already shipped | ✓ Good |
 
 ---
-*Last updated: 2026-06-21 after v1.1 Phase 4 (globe PMTiles) + Phase 5 scaffold*
+*Last updated: 2026-07-28 after completing v1.3 global city completeness and OSINT honesty.*

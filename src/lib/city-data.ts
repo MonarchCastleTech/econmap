@@ -11,6 +11,7 @@ import {
   citySourcesBundleSchema,
   cityWorkspaceSchema,
 } from "@/domain/city-schemas";
+import { rankCitySearchEntries } from "@/lib/city-search";
 
 const GENERATED_CITIES_DIR = path.join(process.cwd(), "src", "data", "generated", "cities");
 const WORKSPACES_DIR = path.join(GENERATED_CITIES_DIR, "workspaces");
@@ -144,24 +145,7 @@ export async function findCityById(cityId: string): Promise<CityRegistryEntry | 
 
 export async function searchCities(query: string, limit = 20): Promise<CityRegistryEntry[]> {
   const registry = await loadCityRegistry();
-  const normalizedQuery = query.toLowerCase().trim();
-
-  if (!normalizedQuery) {
-    return [];
-  }
-
-  return registry
-    .filter((city) => {
-      const nameMatch = city.name.toLowerCase().includes(normalizedQuery);
-      const aliasMatch = city.aliases?.some((alias) =>
-        alias.toLowerCase().includes(normalizedQuery)
-      );
-      const countryMatch = city.countryIso3.toLowerCase().includes(normalizedQuery);
-      const adminMatch = city.admin1Name?.toLowerCase().includes(normalizedQuery);
-
-      return nameMatch || aliasMatch || countryMatch || adminMatch;
-    })
-    .slice(0, limit);
+  return rankCitySearchEntries(registry, query, limit);
 }
 
 export async function generateSearchIndex(): Promise<
@@ -178,6 +162,8 @@ export async function generateSearchIndex(): Promise<
     slug: city.slug,
     name: city.name,
     aliases: city.aliases ?? [],
+    placeClass: city.placeClass ?? "city",
+    featureCode: city.featureCode,
     countryIso3: city.countryIso3,
     admin1Name: city.admin1Name,
     population: city.population,

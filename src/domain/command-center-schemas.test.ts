@@ -14,6 +14,16 @@ describe("command-center schemas", () => {
     expect(() => coverageStateSchema.parse("known_unknown")).toThrow();
   });
 
+  it.each([
+    "observed",
+    "not_observed",
+    "unknown",
+    "unavailable",
+    "not_applicable",
+  ])("accepts explicit source-availability state %s", (state) => {
+    expect(coverageStateSchema.safeParse(state).success).toBe(true);
+  });
+
   it("parses a shipped homepage manifest", () => {
     expect(() =>
       commandCenterManifestSchema.parse({

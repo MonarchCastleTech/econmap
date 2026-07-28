@@ -20,6 +20,32 @@ afterEach(async () => {
 });
 
 describe("generate-mobility-artifacts", () => {
+  it("publishes empty artifacts when the optional Mobility Database feed is unavailable", async () => {
+    const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "econmap-mobility-missing-"));
+    tempDirs.push(rootDir);
+
+    const registryFile = path.join(rootDir, "registry.json");
+    const mobilityCsv = path.join(rootDir, "missing-feeds.csv");
+    const processedIndexesDir = path.join(rootDir, "indexes");
+    const outputFile = path.join(rootDir, "city-mobility-enrichment.json");
+    await fs.writeFile(registryFile, "[]");
+
+    const result = await generateMobilityArtifacts({
+      outputFile,
+      processedIndexesDir,
+      registryFile,
+      mobilityCsv,
+      now: "2026-07-27T00:00:00.000Z",
+    });
+
+    expect(result.cityCount).toBe(0);
+    expect(JSON.parse(await fs.readFile(path.join(processedIndexesDir, "transit-feeds.json"), "utf-8"))).toEqual([]);
+    expect(JSON.parse(await fs.readFile(outputFile, "utf-8"))).toEqual({
+      generatedAt: "2026-07-27T00:00:00.000Z",
+      cities: {},
+    });
+  });
+
   it("publishes city transit feed coverage from the Mobility Database into enrichment, processed indexes, and globe layers", async () => {
     const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "econmap-mobility-"));
     tempDirs.push(rootDir);

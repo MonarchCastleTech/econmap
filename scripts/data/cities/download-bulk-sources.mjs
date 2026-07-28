@@ -44,10 +44,17 @@ const REQUIRED = [
   f("https://ourairports.com/data/countries.csv", "ourairports/countries.csv"),
   f("https://ourairports.com/data/regions.csv", "ourairports/regions.csv"),
   f("https://ourairports.com/data/runways.csv", "ourairports/runways.csv"),
-  // UN/LOCODE (one zip → CSV parts)
-  z("https://service.unece.org/trade/locode/loc242csv.zip", "unlocode/loc242csv", [
-    "2024-2 UNLOCODE CodeListPart1.csv",
-  ]),
+  // Official UN/LOCODE release artifact (one zip -> release/csv/*)
+  z(
+    "https://opensource.unicc.org/un/unece/uncefact/vocab-locode/-/jobs/artifacts/2025-1/download?job=package-release",
+    "unlocode/2025-1",
+    [
+      "release/csv/UNLOCODE CodeListPart1.csv",
+      "release/csv/UNLOCODE CodeListPart2.csv",
+      "release/csv/UNLOCODE CodeListPart3.csv",
+      "release/csv/SubdivisionCodes.csv",
+    ],
+  ),
 ];
 
 /** @type {(FileJob|ZipJob)[]} */

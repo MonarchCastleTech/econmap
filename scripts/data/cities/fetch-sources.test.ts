@@ -32,6 +32,59 @@ function buildCity(cityId: string, name: string) {
 }
 
 describe("fetchCitySources", () => {
+  it("processes a deterministic registry slice by offset and limit", async () => {
+    const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "econmap-fetch-sources-batch-"));
+    tempDirs.push(rootDir);
+
+    const registryFile = path.join(rootDir, "registry.json");
+    const factsDir = path.join(rootDir, "facts");
+    await fs.writeFile(
+      registryFile,
+      JSON.stringify([
+        { ...buildCity("city-1", "First"), latitude: 42.4 },
+        buildCity("city-2", "Second"),
+        { ...buildCity("city-3", "Third"), latitude: 42.6 },
+      ]),
+    );
+
+    await fetchCitySources({
+      registryFile,
+      factsDir,
+      entityIndex: {
+        airports: [
+          {
+            entityId: "airport-ad-001",
+            entityType: "airport",
+            entitySubtype: "small_airport",
+            name: "Andorra Test Airport",
+            latitude: 42.5001,
+            longitude: 1.5001,
+            continent: "EU",
+            countryIso2: "AD",
+            municipality: "Second",
+            scheduledService: false,
+            exactSite: true,
+            sourceId: "ourairports",
+          },
+        ],
+        unlocodeEntities: [],
+        powerPlants: [],
+        researchOrgs: [],
+        wpiPorts: [],
+        mineralSites: [],
+      },
+      cityOffset: 1,
+      maxCities: 1,
+      forceRebuild: true,
+      logger: {
+        log: () => {},
+        warn: () => {},
+      },
+    } as Parameters<typeof fetchCitySources>[0]);
+
+    expect(await fs.readdir(factsDir)).toEqual(["city-2.json"]);
+  });
+
   it("writes local bulk facts from a provided entity index", async () => {
     const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "econmap-fetch-sources-"));
     tempDirs.push(rootDir);

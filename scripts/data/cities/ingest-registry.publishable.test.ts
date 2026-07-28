@@ -55,6 +55,8 @@ describe("ingestRegistry publishable backbone", () => {
         "2\t3041565\tes\tAndorra la Vieja",
         "3\t3041565\tfr\tAndorre-la-Vieille",
         "4\t3041565\tca\tAndorra la Vella",
+        "5\t3041565\tlink\thttps://www.wikidata.org/wiki/Q1863",
+        "6\t3041565\tlink\thttps://www.openstreetmap.org/relation/9407",
       ].join("\n"),
     );
 
@@ -79,5 +81,10 @@ describe("ingestRegistry publishable backbone", () => {
     expect(registry.find((city) => city.name === "Tiny Hamlet")).toBeUndefined();
     expect(registry[0]?.countryIso3).toBe("AND");
     expect(registry[1]?.aliases).toEqual(["Andorra", "Andorra la Vieja"]);
+    expect(registry[1]?.sourceIds).toEqual({
+      geonames: "3041565",
+      wikidata: "Q1863",
+      osm: "relation/9407",
+    });
   });
 });

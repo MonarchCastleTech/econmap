@@ -7,6 +7,10 @@ export const coverageStateSchema = z.enum([
   "verified_city_presence",
   "partial_coverage",
   "not_covered_yet",
+  "observed",
+  "not_observed",
+  "unknown",
+  "unavailable",
   "not_applicable",
 ]);
 export const layerTierSchema = z.enum(["boot", "interactive", "deep", "city-focus"]);

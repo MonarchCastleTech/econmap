@@ -224,6 +224,16 @@ const ANALYST_CATEGORY_DEFINITIONS: CommandCenterAnalystCategoryDefinition[] = [
     metricPatterns: [/mobile-download/i, /mobile-upload/i, /mobile-latency/i],
   },
   {
+    id: "5g-coverage",
+    label: "5G Coverage",
+    section: "telecomConnectivity",
+    detail:
+      "Technology-specific 5G coverage is unknown unless an operator, regulator, or technology-tagged observation is published; generic mobile speed does not prove 5G.",
+    datasetIds: ["ookla"],
+    layerIds: ["connectivity-5g"],
+    metricPatterns: [/(^|-)5g($|-)/i, /nr-coverage/i],
+  },
+  {
     id: "ixps",
     label: "IXPs",
     section: "telecomConnectivity",
@@ -337,6 +347,23 @@ const ANALYST_CATEGORY_DEFINITIONS: CommandCenterAnalystCategoryDefinition[] = [
     detail: "School facility coverage queued from Overture Places and OpenStreetMap extracts.",
     datasetIds: ["overture-places", "geofabrik-openstreetmap"],
     metricPatterns: [/school/i, /education/i],
+  },
+  {
+    id: "places-of-worship",
+    label: "Places of Worship",
+    section: "institutionsPublicServices",
+    detail:
+      "Place-of-worship observations are queued from Overture Places and OpenStreetMap, including religion, denomination, building type, operator, opening hours, service times, and contact fields where published.",
+    datasetIds: ["place-of-worship-observations"],
+    metricPatterns: [
+      /place-of-worship/i,
+      /religion/i,
+      /denomination/i,
+      /mosque/i,
+      /church/i,
+      /temple/i,
+      /synagogue/i,
+    ],
   },
   {
     id: "police",

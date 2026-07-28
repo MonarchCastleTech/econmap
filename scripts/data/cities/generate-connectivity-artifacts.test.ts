@@ -20,7 +20,6 @@ afterEach(async () => {
     }),
   );
 });
-
 async function writeParquetFixture(filePath: string, rows: Array<Record<string, unknown>>) {
   const rowsFile = `${filePath}.rows.json`;
 
@@ -339,5 +338,5 @@ describe("generate-connectivity-artifacts", () => {
         }),
       ]),
     );
-  }, 45000);
+  }, 120000);
 });

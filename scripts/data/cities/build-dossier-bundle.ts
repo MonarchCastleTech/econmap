@@ -19,6 +19,18 @@ const OUT_DIR = path.join(process.cwd(), "public", "data", "cities", "dossiers")
 const SHARD_COUNT = 4; // ~129MB gzip total / 4 ≈ ~32MB/shard, well under the 94MB ceiling
 const SHARD_CEILING = 94 * 1024 * 1024;
 
+type RegistryCity = {
+  cityId: string;
+  slug: string;
+  name: string;
+  aliases?: string[];
+  placeClass?: "city" | "subordinate_place" | "region";
+  population?: number;
+  registrySource?: string;
+  roleTags?: string[];
+  [key: string]: unknown;
+};
+
 function readJsonOrNull(file: string): unknown {
   try {
     return JSON.parse(fs.readFileSync(file, "utf-8"));
@@ -27,9 +39,62 @@ function readJsonOrNull(file: string): unknown {
   }
 }
 
+function buildRegistryOnlyWorkspace(city: RegistryCity, updatedAt: string) {
+  const registrySourceName = city.registrySource ?? "Registry";
+  const registrySource = {
+    id: registrySourceName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    name: registrySourceName,
+    updatedAt,
+    coverage: "global",
+    methodology: "Canonical city identity, coordinates, hierarchy, and population from the registry source.",
+    coverageState: "verified_exact",
+    ...(registrySourceName === "GeoNames" ? { url: "https://www.geonames.org/" } : {}),
+  };
+  const economicFactbook = city.population == null
+    ? []
+    : [
+        {
+          indicatorId: "population",
+          value: city.population,
+          unit: "persons",
+          status: "actual",
+          source: registrySource,
+        },
+      ];
+
+  return {
+    city,
+    summary: `${city.name} registry-backed OSINT workspace; unavailable enrichments are reported as coverage gaps.`,
+    roleTags: city.roleTags ?? [],
+    coverage: {
+      economicFactbook: economicFactbook.length > 0 ? "verified_exact" : "not_covered_yet",
+      investorIntel: "not_covered_yet",
+      urbanIntel: "not_covered_yet",
+    },
+    economicFactbook,
+    investorIntel: [],
+    urbanIntel: [],
+    entityCounts: {},
+    entityHighlights: [],
+    mapLayerSummary: {
+      availableLayers: ["cities"],
+    },
+    sources: [registrySource],
+  };
+}
+
 function main() {
   const wsDir = path.join(SRC, "workspaces");
-  const ids = fs.readdirSync(wsDir).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
+  const registry = JSON.parse(
+    fs.readFileSync(path.join(SRC, "registry.json"), "utf-8"),
+  ) as RegistryCity[];
+  const manifest = readJsonOrNull(path.join(SRC, "manifest.json")) as { generatedAt?: string } | null;
+  const updatedAt = manifest?.generatedAt?.slice(0, 10) ?? "1970-01-01";
+  const canonicalCities = registry
+    .filter((city) => city.placeClass !== "subordinate_place" && city.placeClass !== "region")
+    .sort((a, b) => a.cityId.localeCompare(b.cityId));
+  const ids = canonicalCities.map((city) => city.cityId);
+  const citiesById = new Map(canonicalCities.map((city) => [city.cityId, city]));
   console.log(`Packing ${ids.length} city dossiers into ${SHARD_COUNT} shards...`);
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -40,14 +105,18 @@ function main() {
   let missingEntities = 0;
   let missingSources = 0;
   let missingCoverage = 0;
+  let baselineOnlyDossiers = 0;
   let rawBytes = 0;
   let packedBytes = 0;
   let maxRaw = 0;
   let maxRawId = "";
 
   for (const cityId of ids) {
-    const w = readJsonOrNull(path.join(wsDir, `${cityId}.json`));
-    if (w === null) continue; // workspace is required to be a valid dossier
+    const generatedWorkspace = readJsonOrNull(path.join(wsDir, `${cityId}.json`));
+    const city = citiesById.get(cityId);
+    if (!city) continue;
+    const w = generatedWorkspace ?? buildRegistryOnlyWorkspace(city, updatedAt);
+    if (generatedWorkspace === null) baselineOnlyDossiers += 1;
     const e = readJsonOrNull(path.join(SRC, "entities", `${cityId}.json`));
     const s = readJsonOrNull(path.join(SRC, "sources", `${cityId}.json`));
     const c = readJsonOrNull(path.join(SRC, "coverage", `${cityId}.json`));
@@ -94,6 +163,7 @@ function main() {
         missingEntities,
         missingSources,
         missingCoverage,
+        baselineOnlyDossiers,
         largestRawCityId: maxRawId,
         largestRawBytes: maxRaw,
         rawBytes,
@@ -106,7 +176,7 @@ function main() {
   );
 
   console.log(
-    `Done: ${Object.keys(entries).length} dossiers, raw ${(rawBytes / 1048576).toFixed(0)}MB -> packed ${(packedBytes / 1048576).toFixed(0)}MB across ${SHARD_COUNT} shards (max raw dossier ${(maxRaw / 1024).toFixed(0)}KB @ ${maxRawId}). missing e/s/c: ${missingEntities}/${missingSources}/${missingCoverage}.`,
+    `Done: ${Object.keys(entries).length} dossiers (${baselineOnlyDossiers} registry-only), raw ${(rawBytes / 1048576).toFixed(0)}MB -> packed ${(packedBytes / 1048576).toFixed(0)}MB across ${SHARD_COUNT} shards (max raw dossier ${(maxRaw / 1024).toFixed(0)}KB @ ${maxRawId}). missing e/s/c: ${missingEntities}/${missingSources}/${missingCoverage}.`,
   );
 }
 

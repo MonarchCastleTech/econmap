@@ -5,6 +5,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   output: "export",
+  outputFileTracingRoot: process.cwd(),
   trailingSlash: true,
   basePath,
   // NOTE: assetPrefix intentionally omitted. basePath alone already prefixes /_next/* asset

@@ -7,11 +7,130 @@ This engagement takes a mature-but-rough MapFactbook build and makes it genuinel
 ## Phases
 
 - [x] **Phase 0: Render unblock & data bootstrap** - Make the app render on a fresh clone; acquire required bulk sources
-- [ ] **Phase 1: Left menu / navigation redesign** - Turn the left menu into useful, search-first, sectioned navigation
-- [ ] **Phase 2: Performance & export optimization** - Shrink the 630 MB / 119k-file export; lighten client + map runtime
-- [ ] **Phase 3: City data coverage** - Graceful gaps for minor cities + expand raw coverage via the pipeline
+- [x] **Phase 1: Left menu / navigation redesign** - Turn the left menu into useful, search-first, sectioned navigation
+- [x] **Phase 2: Performance & export optimization** - Shrink the 630 MB / 119k-file export; lighten client + map runtime
+- [x] **Phase 3: City data coverage** - Graceful gaps for minor cities + expand raw coverage via the pipeline
+- [x] **Phase 4: Globe vector tiles (PMTiles packing)** - Pack operational layers into one range-addressable archive
+- [x] **Phase 5: Full city enrichment coverage** - Expand source-backed enrichment from 7,310 to 9,235 cities
+- [x] **Phase 6: City ontology and identity** - Separate cities, subordinate districts, and regions with canonical source IDs
+- [x] **Phase 7: Full-city processing and coverage report** - Make all 95,915 canonical cities resumably processable
+- [x] **Phase 8: OSINT source catalog and observations** - Publish honest availability contracts and add priority observations
+- [x] **Phase 9: City profile and search experience** - Expose identity, provenance, observations, and gaps per city
+- [x] **Phase 10: Global verification and data audit** - Prove acceptance cities, coverage semantics, and release integrity
+- [x] **Phase 11: Temporal city observation model** - Snapshot, diff, history, and alert contracts
+- [x] **Phase 12: Telecom evidence tiers** - Separate coverage claims from measured performance
+- [x] **Phase 13: Network and urban source adapters** - Source contracts for open, credentialed, manual, and licensed inputs
+- [x] **Phase 14: Operational hazard ingestion** - Match live public hazards to canonical cities
+- [x] **Phase 15: Time machine and saved-city alerts** - Evidence-aware UI in OSINT and city dossiers
+- [x] **Phase 16: v1.4 verification and release audit** - Generate, test, build, and inspect the product
 
 ## Phase Details
+
+## Milestone v1.3 - Global city completeness and OSINT honesty (started 2026-07-27)
+
+### Phase 6: City ontology and identity
+**Goal**: Define and enforce a stable identity model for cities, subordinate districts, and regions.
+**Depends on**: Phase 5
+**Requirements**: CITY-01, CITY-02, CITY-03, PROV-01
+**Success Criteria** (what must be TRUE):
+  1. Registry records expose a normalized place class and canonical GeoNames/Wikidata/OSM identifiers when known.
+  2. City search prioritizes canonical settlements and keeps subordinate places and regions out of the public city result set.
+  3. Bursa, Antalya, Diyarbakir, Izmir, Mus, Mexico City, Paris, and Toulouse resolve as cities.
+  4. Kecioren, Esenyurt, and Varto retain their real source identity but are not promoted as peer major-city results.
+  5. California resolves as a region, not a city.
+
+### Phase 7: Full-registry processing and coverage report
+**Goal**: Make all 95,915 canonical cities eligible for resumable processing and measurable coverage while retaining 192,445 populated places in the source registry.
+**Depends on**: Phase 6
+**Requirements**: PIPE-01, PIPE-02
+**Success Criteria** (what must be TRUE):
+  1. The pipeline supports deterministic batches, checkpoints, retries, and resume without duplicate output.
+  2. A generated report distinguishes total, processed, failed, unresolved, and source-observed counts.
+  3. Every registry city receives a baseline record even when no sparse OSINT observation matches.
+  4. Generation and reporting tests pass without requiring manual portal downloads.
+
+### Phase 8: OSINT source catalog and observations
+**Goal**: Publish a source-availability contract and expand high-value mapped observations without fabricating coverage.
+**Depends on**: Phase 7
+**Requirements**: OSINT-01, OSINT-02
+**Success Criteria** (what must be TRUE):
+  1. Every layer declares sources, join method, scope, fields, default state, and a gap reason.
+  2. Coverage states distinguish observed, not observed, unknown, unavailable, and not applicable.
+  3. Place-of-worship observations are implemented from documented OSM/Overture fields.
+  4. Priority emergency, transport, government, environment, education, utility, and telecom observations are cataloged.
+  5. 5G remains explicitly non-universal unless a source-backed city observation exists.
+
+### Phase 9: City profile and search experience
+**Goal**: Make identity, baseline facts, observations, provenance, timestamps, confidence, and gaps usable per city.
+**Depends on**: Phase 8
+**Requirements**: UI-01
+**Success Criteria** (what must be TRUE):
+  1. A city profile renders for every registry city, including baseline-only cities.
+  2. Public city search returns canonical cities, preserves aliases/transliterations, and excludes subordinate places and regions.
+  3. Source links, observation timestamps, confidence, and explicit gap states are visible and accessible.
+  4. Layout remains usable on desktop and mobile and preserves static-export constraints.
+
+### Phase 10: Global verification and data audit
+**Goal**: Verify the full milestone against requested cities, provenance rules, performance limits, and release checks.
+**Depends on**: Phase 9
+**Requirements**: QA-01
+**Success Criteria** (what must be TRUE):
+  1. Acceptance fixtures cover the requested Turkish and international cities plus district/region counterexamples.
+  2. Focused tests, full tests, typecheck, lint, build, and `audit:data` pass or have documented pre-existing failures.
+  3. Generated coverage totals reconcile with the registry and no sparse-source absence is represented as a negative fact.
+  4. Roadmap, requirements, source registry, and generated manifests agree.
+
+## Progress (v1.3)
+
+| Phase | Status | Completed |
+|-------|--------|-----------|
+| 6. City ontology and identity | Complete | 2026-07-27 |
+| 7. Full-city processing and coverage report | Complete - 95,915 canonical / 42,873 observed / 53,042 unresolved / 0 failed | 2026-07-28 |
+| 8. OSINT source catalog and observations | Complete - source contracts, worship inventory, explicit 5G unknown | 2026-07-28 |
+| 9. City profile and search experience | Complete - 95,915 packed dossiers and searchable cities; districts excluded | 2026-07-28 |
+| 10. Global verification and data audit | Complete - 230 tests, build, audit 5/5, browser checks | 2026-07-28 |
+
+## Milestone v1.4 - City time machine and operational OSINT (started 2026-07-28)
+
+### Phase 11: Temporal city observation model
+Timestamped observation, geography, delta, alert, bundle, index, and feed schemas now preserve source URL,
+methodology, confidence, and deterministic change history.
+
+### Phase 12: Telecom evidence tiers
+Telecom evidence is classified as regulator-confirmed, operator-claimed, measured performance, or unknown.
+Schema and audit rules prohibit speed-test measurements from being labeled as observed 5G coverage.
+
+### Phase 13: Network and urban source adapters
+Nine source contracts cover Ookla, M-Lab, RIPE Atlas, FCC BDC, GSMA, GHSL, OpenAQ, NASA FIRMS, and USGS.
+Unavailable files, credentials, and licenses remain visible as source states rather than negative city facts.
+
+### Phase 14: Operational hazard ingestion
+The reproducible USGS refresh spatially matches current magnitude 2.5+ earthquakes to canonical cities within
+100 km. The first snapshot produced 406 observations across 288 cities.
+
+### Phase 15: Time machine and saved-city alerts
+The OSINT console and full city dossier render evidence, source status, history, geography, and hazards. Saved
+cities receive filtered, severity-ordered alerts.
+
+### Phase 16: v1.4 verification and release audit
+**Requirements**: QA-02
+
+**Success Criteria**:
+  1. Focused and full tests, typecheck, lint, and production build pass.
+  2. `audit:data` validates city-observation provenance and telecom evidence rules.
+  3. Desktop and mobile browser checks verify search, evidence, history, hazards, and saved alerts.
+  4. Generated source status never overstates unavailable, credentialed, manual, or licensed coverage.
+
+## Progress (v1.4)
+
+| Phase | Status | Completed |
+|-------|--------|-----------|
+| 11. Temporal city observation model | Complete | 2026-07-28 |
+| 12. Telecom evidence tiers | Complete | 2026-07-28 |
+| 13. Network and urban source adapters | Complete | 2026-07-28 |
+| 14. Operational hazard ingestion | Complete - 406 observations / 288 cities | 2026-07-28 |
+| 15. Time machine and saved-city alerts | Complete | 2026-07-28 |
+| 16. v1.4 verification and release audit | Complete - 255 tests, build, audit 6/6, desktop/mobile Playwright | 2026-07-28 |
 
 ### Phase 0: Render unblock & data bootstrap
 **Goal**: A freshly-cloned repo runs `npm run dev` and renders; the required bulk data sources are available locally.

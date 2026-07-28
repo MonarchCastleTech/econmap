@@ -31,6 +31,7 @@ const FACTS_DIR = path.join(process.cwd(), "data", "raw", "cities", "facts");
 
 type CityRegistryEntry = {
   cityId: string;
+  placeClass?: "city" | "subordinate_place";
   countryIso2: string;
   countryIso3?: string;
   latitude: number;
@@ -72,6 +73,8 @@ type FetchCitySourcesOptions = {
   logger?: Pick<Console, "log" | "warn">;
   /** Process only cities matching this predicate (for scoped validation runs). */
   cityFilter?: (city: CityRegistryEntry) => boolean;
+  /** Zero-based offset applied after cityFilter for deterministic batch runs. */
+  cityOffset?: number;
   /** Cap the number of cities processed (after cityFilter) — for scoped validation runs. */
   maxCities?: number;
 };
@@ -152,7 +155,14 @@ export async function fetchCitySources(options: FetchCitySourcesOptions = {}) {
 
   let workingRegistry = registry;
   if (options.cityFilter) workingRegistry = workingRegistry.filter(options.cityFilter);
-  if (options.maxCities != null) workingRegistry = workingRegistry.slice(0, options.maxCities);
+  const cityOffset = Math.max(0, options.cityOffset ?? 0);
+  const cityLimit = options.maxCities == null
+    ? undefined
+    : Math.max(0, options.maxCities);
+  workingRegistry = workingRegistry.slice(
+    cityOffset,
+    cityLimit == null ? undefined : cityOffset + cityLimit,
+  );
   if (workingRegistry.length !== registry.length) {
     logger.log(`Scoped run: processing ${workingRegistry.length} of ${registry.length} cities.`);
   }

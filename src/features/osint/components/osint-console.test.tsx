@@ -1,6 +1,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+const WATCHLIST = vi.hoisted(() => ({
+  items: ["geo-1-portville"],
+  toggle: vi.fn(),
+}));
+
 // Minimal fixtures shaped like the real client returns (the component reads a small subset).
 const INDEX = [
   { cityId: "geo-1", slug: "geo-1-portville", name: "Portville", aliases: [], countryIso3: "USA", admin1Name: "California", population: 900_000, isMajorCity: true },
@@ -28,6 +33,39 @@ vi.mock("@/lib/city-data-client", () => ({
   loadCityCoverageShell: vi.fn(async (id: string) => (id === "geo-1" ? PORTVILLE_COVERAGE : null)),
 }));
 
+vi.mock("@/lib/city-intelligence-client", () => ({
+  loadCityIntelligence: vi.fn(async (cityId: string) => ({
+    schemaVersion: "1.0",
+    generatedAt: "2026-07-28T00:00:00.000Z",
+    cityId,
+    telecomEvidence: "unknown",
+    geographies: [],
+    observations: [],
+    deltas: [],
+    alerts: [],
+    sourceStatuses: [],
+  })),
+  loadCityAlerts: vi.fn(async () => [
+    {
+      id: "alert-1",
+      cityId: "geo-1",
+      topic: "hazard",
+      severity: "warning",
+      changeType: "added",
+      title: "Earthquake detected",
+      summary: "A nearby event was detected.",
+      sourceId: "usgs-earthquakes",
+      observedAt: "2026-07-28T00:00:00.000Z",
+      detectedAt: "2026-07-28T00:00:00.000Z",
+    },
+  ]),
+}));
+
+vi.mock("@/store/watchlist-store", () => ({
+  useWatchlistStore: (selector: (state: typeof WATCHLIST) => unknown) =>
+    selector(WATCHLIST),
+}));
+
 import { OsintConsole } from "@/features/osint/components/osint-console";
 
 describe("OsintConsole", () => {
@@ -50,6 +88,8 @@ describe("OsintConsole", () => {
     expect(await screen.findByText("Big Harbor")).toBeInTheDocument();
     expect(screen.getByText("Tech University")).toBeInTheDocument();
     expect(screen.getByText("Coverage")).toBeInTheDocument();
+    expect(screen.getByText("Telecom and network evidence")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "City time machine" })).toBeInTheDocument();
     // two entity types → filter chips render
     expect(screen.getByRole("button", { name: /Ports \(1\)/ })).toBeInTheDocument();
   });
@@ -61,6 +101,17 @@ describe("OsintConsole", () => {
     fireEvent.click(screen.getByRole("button", { name: /Research & universities \(1\)/ }));
     await waitFor(() => expect(screen.queryByText("Big Harbor")).not.toBeInTheDocument());
     expect(screen.getByText("Tech University")).toBeInTheDocument();
+  });
+
+  it("shows saved-city alerts and toggles the selected city watchlist state", async () => {
+    render(<OsintConsole />);
+
+    expect(await screen.findByText("Saved city alerts")).toBeInTheDocument();
+    expect(screen.getByText("Earthquake detected")).toBeInTheDocument();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Portville/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Remove Portville from saved cities" }));
+    expect(WATCHLIST.toggle).toHaveBeenCalledWith("geo-1-portville");
   });
 
   it("an identity-only city (no dossier) shows the explicit gap message, not fabricated data", async () => {

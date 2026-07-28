@@ -222,10 +222,110 @@ export function geospatialCheck(): CheckResult {
   return r;
 }
 
+/** CITY-INTELLIGENCE â€” temporal observations must be attributable and telecom claims evidence-safe. */
+export function cityIntelligenceCheck(): CheckResult {
+  const r: CheckResult = {
+    id: "city-intelligence",
+    title: "City intelligence (provenance and telecom evidence)",
+    status: "pass",
+    failures: [],
+    warnings: [],
+    metrics: {},
+  };
+  const file = path.join(ROOT, "public", "data", "cities", "intelligence.json");
+  const index = readJson<{
+    cities?: Record<
+      string,
+      {
+        observations?: Array<{
+          id?: string;
+          topic?: string;
+          state?: string;
+          value?: unknown;
+          unit?: string | null;
+          evidenceKind?: string;
+          sourceId?: string;
+          sourceUrl?: string;
+          observedAt?: string;
+          methodology?: string;
+          confidence?: string;
+        }>;
+      }
+    >;
+    sourceStatuses?: Array<{ id?: string }>;
+  }>(file);
+
+  if (!index) {
+    r.status = "warn";
+    r.warnings.push("City intelligence artifact is absent; run `npm run data:cities:intelligence`.");
+    return r;
+  }
+
+  let observations = 0;
+  let observed5g = 0;
+  const activeSources = new Set<string>();
+  const badEvidenceKinds = new Set(["measured_performance", "derived", "unknown"]);
+  for (const [cityId, city] of Object.entries(index.cities ?? {})) {
+    for (const observation of city.observations ?? []) {
+      observations += 1;
+      if (observation.sourceId) activeSources.add(observation.sourceId);
+      const missing = [
+        ["id", observation.id],
+        ["sourceId", observation.sourceId],
+        ["sourceUrl", observation.sourceUrl],
+        ["observedAt", observation.observedAt],
+        ["methodology", observation.methodology],
+        ["confidence", observation.confidence],
+        ["evidenceKind", observation.evidenceKind],
+      ].filter(([, value]) => !value);
+      if (missing.length > 0 && r.failures.length < 20) {
+        r.failures.push(`${cityId}:${observation.id ?? "?"} missing ${missing.map(([key]) => key).join(", ")}`);
+      }
+      const license = observation.sourceId
+        ? getSourceLicense(observation.sourceId)
+        : undefined;
+      if (observation.sourceId && !license) {
+        r.failures.push(
+          `${cityId}:${observation.id ?? "?"} uses unvetted source "${observation.sourceId}"`,
+        );
+      } else if (license?.commercial) {
+        r.failures.push(
+          `${cityId}:${observation.id ?? "?"} ships commercial source "${observation.sourceId}"`,
+        );
+      }
+
+      const valueText = `${String(observation.value ?? "")} ${observation.unit ?? ""}`.toLowerCase();
+      const isObserved5g =
+        observation.topic === "telecom_coverage" &&
+        observation.state === "observed" &&
+        /(^|\W)(5g|nr)(\W|$)/i.test(valueText);
+      if (isObserved5g) {
+        observed5g += 1;
+        if (badEvidenceKinds.has(observation.evidenceKind ?? "")) {
+          r.failures.push(
+            `${cityId}:${observation.id ?? "?"} labels 5G coverage from ${observation.evidenceKind ?? "missing"} evidence`,
+          );
+        }
+      }
+    }
+  }
+
+  r.metrics = {
+    cities: Object.keys(index.cities ?? {}).length,
+    observations,
+    observed5g,
+    activeSources: activeSources.size,
+    sourceContracts: index.sourceStatuses?.length ?? 0,
+  };
+  r.status = r.failures.length ? "fail" : "pass";
+  return r;
+}
+
 export const ALL_CHECKS = [
   sizeBudgetCheck,
   licenseCheck,
   countConsistencyCheck,
   provenanceCheck,
   geospatialCheck,
+  cityIntelligenceCheck,
 ];

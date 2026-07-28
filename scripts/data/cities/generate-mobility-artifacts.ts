@@ -205,55 +205,58 @@ export async function generateMobilityArtifacts(options: GenerateMobilityArtifac
   const registry = JSON.parse(await fs.readFile(registryFile, "utf-8")) as CityRegistryEntry[];
   const cityLookup = buildCityLookup(registry);
   const aggregatedCities = new Map<string, AggregatedTransitCity>();
+  const mobilityFeedExists = await fs.access(mobilityCsv).then(() => true).catch(() => false);
 
-  for await (const row of createCsvRecordStream<MobilityFeedRow>(mobilityCsv)) {
-    if ((row.status ?? "").trim().toLowerCase() !== "active") {
-      continue;
+  if (mobilityFeedExists) {
+    for await (const row of createCsvRecordStream<MobilityFeedRow>(mobilityCsv)) {
+      if ((row.status ?? "").trim().toLowerCase() !== "active") {
+        continue;
+      }
+
+      if (!((row.data_type ?? "").trim().toLowerCase().startsWith("gtfs"))) {
+        continue;
+      }
+
+      const municipality = normalizeLabel(row["location.municipality"]);
+      const countryIso2 = (row["location.country_code"] ?? "").trim().toUpperCase();
+
+      if (!municipality || !countryIso2) {
+        continue;
+      }
+
+      const candidates = cityLookup.get(`${countryIso2}:${municipality}`) ?? [];
+      if (candidates.length === 0) {
+        continue;
+      }
+
+      const selectedCity = chooseCity(candidates, row);
+      const currentEntry = aggregatedCities.get(selectedCity.cityId) ?? {
+        city: selectedCity,
+        feedIds: new Set<string>(),
+        officialFeedIds: new Set<string>(),
+        providers: new Set<string>(),
+        latestObservedAt: toDateOnly(row["location.bounding_box.extracted_on"], generatedAt.slice(0, 10)),
+      };
+
+      if (row.id) {
+        currentEntry.feedIds.add(row.id);
+      }
+
+      if (row.id && toBoolean(row.is_official)) {
+        currentEntry.officialFeedIds.add(row.id);
+      }
+
+      if (row.provider?.trim()) {
+        currentEntry.providers.add(row.provider.trim());
+      }
+
+      const extractedOn = toDateOnly(row["location.bounding_box.extracted_on"], generatedAt.slice(0, 10));
+      if (extractedOn > currentEntry.latestObservedAt) {
+        currentEntry.latestObservedAt = extractedOn;
+      }
+
+      aggregatedCities.set(selectedCity.cityId, currentEntry);
     }
-
-    if (!((row.data_type ?? "").trim().toLowerCase().startsWith("gtfs"))) {
-      continue;
-    }
-
-    const municipality = normalizeLabel(row["location.municipality"]);
-    const countryIso2 = (row["location.country_code"] ?? "").trim().toUpperCase();
-
-    if (!municipality || !countryIso2) {
-      continue;
-    }
-
-    const candidates = cityLookup.get(`${countryIso2}:${municipality}`) ?? [];
-    if (candidates.length === 0) {
-      continue;
-    }
-
-    const selectedCity = chooseCity(candidates, row);
-    const currentEntry = aggregatedCities.get(selectedCity.cityId) ?? {
-      city: selectedCity,
-      feedIds: new Set<string>(),
-      officialFeedIds: new Set<string>(),
-      providers: new Set<string>(),
-      latestObservedAt: toDateOnly(row["location.bounding_box.extracted_on"], generatedAt.slice(0, 10)),
-    };
-
-    if (row.id) {
-      currentEntry.feedIds.add(row.id);
-    }
-
-    if (row.id && toBoolean(row.is_official)) {
-      currentEntry.officialFeedIds.add(row.id);
-    }
-
-    if (row.provider?.trim()) {
-      currentEntry.providers.add(row.provider.trim());
-    }
-
-    const extractedOn = toDateOnly(row["location.bounding_box.extracted_on"], generatedAt.slice(0, 10));
-    if (extractedOn > currentEntry.latestObservedAt) {
-      currentEntry.latestObservedAt = extractedOn;
-    }
-
-    aggregatedCities.set(selectedCity.cityId, currentEntry);
   }
 
   const processedIndex = Array.from(aggregatedCities.values())

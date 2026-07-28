@@ -33,12 +33,21 @@ async function main() {
   // otherwise parses to ~500MB resident per worker and OOMs the export.
   {
     const genDir = path.join(process.cwd(), "src", "data", "generated", "cities");
-    const registry: Array<{ slug: string; name: string; countryIso3: string; population?: number | null }> =
+    const registry: Array<{
+      slug: string;
+      name: string;
+      countryIso3: string;
+      placeClass?: "city" | "subordinate_place";
+      population?: number | null;
+    }> =
       JSON.parse(fs.readFileSync(path.join(genDir, "registry.json"), "utf-8"));
     const meta: Record<string, { n: string; i: string; p: number }> = {};
-    for (const c of registry) meta[c.slug] = { n: c.name, i: c.countryIso3, p: c.population ?? 0 };
+    for (const c of registry) {
+      if (c.placeClass === "subordinate_place") continue;
+      meta[c.slug] = { n: c.name, i: c.countryIso3, p: c.population ?? 0 };
+    }
     fs.writeFileSync(path.join(genDir, "slug-meta.json"), JSON.stringify(meta));
-    console.log(`  wrote slug-meta.json (${registry.length} entries)`);
+    console.log(`  wrote slug-meta.json (${Object.keys(meta).length} entries)`);
   }
 
   console.log(`[2/5] fetch sources (scoped join, pop >= ${minPop})...`);

@@ -48,6 +48,27 @@ describe("generateArtifacts", () => {
         registrySource: "GeoNames",
         recordStatus: "active",
         roleTags: [],
+        placeClass: "city",
+      },
+      {
+        cityId: "geo-2",
+        slug: "andorra-district",
+        name: "Andorra District",
+        aliases: [],
+        placeClass: "subordinate_place",
+        countryIso2: "AD",
+        countryIso3: "AND",
+        countrySlug: "andorra",
+        admin1Name: "Andorra la Vella",
+        admin1Code: "07",
+        latitude: 42.51,
+        longitude: 1.52,
+        boundaryStatus: "point_only",
+        population: 1000,
+        populationSource: "GeoNames",
+        registrySource: "GeoNames",
+        recordStatus: "active",
+        roleTags: [],
       },
     ];
 
@@ -130,6 +151,10 @@ describe("generateArtifacts", () => {
     const manifest = JSON.parse(
       await fs.readFile(path.join(generatedDir, "manifest.json"), "utf-8"),
     );
+    const coverageReport = await fs
+      .readFile(path.join(generatedDir, "coverage-report.json"), "utf-8")
+      .then((content) => JSON.parse(content))
+      .catch(() => null);
     const workspace = JSON.parse(
       await fs.readFile(path.join(generatedDir, "workspaces", "geo-1.json"), "utf-8"),
     );
@@ -143,9 +168,25 @@ describe("generateArtifacts", () => {
       await fs.readFile(path.join(generatedDir, "sources", "geo-1.json"), "utf-8"),
     );
 
-    expect(searchIndex).toHaveLength(1);
+    expect(searchIndex).toHaveLength(2);
+    expect(searchIndex).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ cityId: "geo-1", placeClass: "city" }),
+        expect.objectContaining({ cityId: "geo-2", placeClass: "subordinate_place" }),
+      ]),
+    );
     expect(manifest.totalCityCount).toBe(1);
+    expect(manifest.totalPlaceCount).toBe(2);
     expect(manifest.processedCityCount).toBe(1);
+    expect(coverageReport).toEqual(
+      expect.objectContaining({
+        totalCityCount: 1,
+        baselineCityCount: 1,
+        processedCityCount: 1,
+        unresolvedCityCount: 0,
+        sourceObservedCityCount: 1,
+      }),
+    );
     expect(manifest.coverageShellCount).toBe(1);
     expect(manifest.coverageShellBoundaryCounts).toEqual({
       has_boundary: 0,

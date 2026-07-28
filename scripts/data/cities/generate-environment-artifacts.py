@@ -262,6 +262,9 @@ def build_unique_city_lookup(selected_cities: list[SelectedCity]) -> dict[str, S
 
 
 def load_latest_who_rows(who_file: Path, name_lookup: dict[tuple[str, str], list[SelectedCity]]):
+    if not who_file.exists():
+        return {}
+
     who_data = pd.read_excel(who_file, sheet_name="Update 2024 (V6.1)")
     latest_rows: dict[str, dict[str, object]] = {}
 

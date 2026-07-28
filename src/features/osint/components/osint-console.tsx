@@ -11,7 +11,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Crosshair, ExternalLink, MapPin, Search } from "lucide-react";
+import { Bell, Crosshair, ExternalLink, MapPin, Search, Star } from "lucide-react";
 
 import {
   loadCityCoverageShell,
@@ -20,9 +20,15 @@ import {
   type CityCoverageShell,
   type CitySearchIndexEntry,
 } from "@/lib/city-data-client";
+import { loadCityAlerts, loadCityIntelligence } from "@/lib/city-intelligence-client";
+import type { CityAlert, CityIntelligenceBundle } from "@/domain/city-intelligence-schemas";
 import { COVERAGE_STYLE, entityIcon, entityLabel, fmtPop } from "@/features/osint/lib/entity-display";
+import { CityEvidencePanel } from "@/features/osint/components/city-evidence-panel";
+import { CityTimeMachine } from "@/features/osint/components/city-time-machine";
 import { EntityMiniMap } from "@/features/osint/components/entity-mini-map";
 import { briefFilename, cityBriefToJson, cityBriefToMarkdown, downloadText } from "@/features/osint/lib/investigation";
+import { alertsForWatchlist } from "@/features/osint/lib/watchlist-alerts";
+import { useWatchlistStore } from "@/store/watchlist-store";
 
 type Entity = NonNullable<Awaited<ReturnType<typeof loadCityEntities>>>["entities"][number];
 type Sources = NonNullable<Awaited<ReturnType<typeof loadCityEntities>>>["sources"];
@@ -45,9 +51,13 @@ export function OsintConsole() {
   const [entities, setEntities] = useState<Entity[] | null>(null);
   const [sources, setSources] = useState<Sources>([]);
   const [coverage, setCoverage] = useState<CityCoverageShell | null>(null);
+  const [intelligence, setIntelligence] = useState<CityIntelligenceBundle | null>(null);
+  const [allAlerts, setAllAlerts] = useState<CityAlert[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [hasDossier, setHasDossier] = useState<boolean | null>(null);
   const [typeFilter, setTypeFilter] = useState<Set<string>>(new Set());
+  const watchlistItems = useWatchlistStore((state) => state.items);
+  const toggleWatchlist = useWatchlistStore((state) => state.toggle);
   const inputRef = useRef<HTMLInputElement>(null);
   // Monotonic token: only the latest selection is allowed to write detail state, so an
   // out-of-order dossier resolution can't render one city's data under another's header.
@@ -83,6 +93,20 @@ export function OsintConsole() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    loadCityAlerts()
+      .then((alerts) => {
+        if (!cancelled) setAllAlerts(alerts);
+      })
+      .catch(() => {
+        if (!cancelled) setAllAlerts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // "/" focuses the search box (consistent with the home command rail).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -111,22 +135,41 @@ export function OsintConsole() {
       .slice(0, 50);
   }, [index, query]);
 
+  const savedCityIds = useMemo(() => {
+    if (!index || watchlistItems.length === 0) return [];
+    const saved = new Set(watchlistItems);
+    return index
+      .filter(({ e }) => saved.has(e.slug) || saved.has(e.cityId))
+      .map(({ e }) => e.cityId);
+  }, [index, watchlistItems]);
+
+  const savedAlerts = useMemo(
+    () => alertsForWatchlist(allAlerts, savedCityIds, 8),
+    [allAlerts, savedCityIds],
+  );
+
   function selectCity(entry: CitySearchIndexEntry) {
     const reqId = ++latestReq.current;
     setSelected(entry);
     setDetailLoading(true);
     setEntities(null);
     setCoverage(null);
+    setIntelligence(null);
     setSources([]);
     setHasDossier(null);
     setTypeFilter(new Set()); // clear stale entity-type filters when switching cities
 
-    Promise.all([loadCityEntities(entry.cityId), loadCityCoverageShell(entry.cityId)])
-      .then(([ent, cov]) => {
+    Promise.all([
+      loadCityEntities(entry.cityId),
+      loadCityCoverageShell(entry.cityId),
+      loadCityIntelligence(entry.cityId),
+    ])
+      .then(([ent, cov, cityIntelligence]) => {
         if (reqId !== latestReq.current) return; // a newer selection superseded this one
         setEntities(ent?.entities ?? []);
         setSources(ent?.sources ?? []);
         setCoverage(cov);
+        setIntelligence(cityIntelligence);
         setHasDossier(Boolean(ent || cov));
         setDetailLoading(false);
       })
@@ -135,6 +178,7 @@ export function OsintConsole() {
         setEntities([]);
         setSources([]);
         setCoverage(null);
+        setIntelligence(null);
         setHasDossier(false);
         setDetailLoading(false);
       });
@@ -224,6 +268,26 @@ export function OsintConsole() {
               </kbd>
             </div>
           </div>
+          {watchlistItems.length > 0 ? (
+            <section aria-labelledby="saved-city-alerts" className="border-b border-white/10 px-3 py-3">
+              <p id="saved-city-alerts" className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-400">
+                <Bell aria-hidden className="size-3.5 text-amber-300" />
+                Saved city alerts
+              </p>
+              {savedAlerts.length > 0 ? (
+                <ul className="mt-2 space-y-1.5">
+                  {savedAlerts.map((alert) => (
+                    <li key={alert.id} className="border-l-2 border-amber-300/60 pl-2">
+                      <p className="text-xs font-medium text-slate-200">{alert.title}</p>
+                      <p className="line-clamp-1 text-[11px] text-slate-500">{alert.summary}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-xs text-slate-500">No new changes</p>
+              )}
+            </section>
+          ) : null}
           <ul
             aria-label={results.length ? `Search results, ${results.length} cities` : "Search results"}
             className="min-h-0 flex-1 overflow-y-auto p-2"
@@ -287,6 +351,26 @@ export function OsintConsole() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleWatchlist(selected.slug)}
+                    aria-label={
+                      watchlistItems.includes(selected.slug)
+                        ? `Remove ${selected.name} from saved cities`
+                        : `Save ${selected.name}`
+                    }
+                    title={
+                      watchlistItems.includes(selected.slug)
+                        ? `Remove ${selected.name} from saved cities`
+                        : `Save ${selected.name}`
+                    }
+                    className="inline-flex size-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-300 transition-colors hover:bg-white/10 hover:text-amber-200"
+                  >
+                    <Star
+                      aria-hidden
+                      className={`size-4 ${watchlistItems.includes(selected.slug) ? "fill-amber-300 text-amber-300" : ""}`}
+                    />
+                  </button>
                   {hasDossier && entities ? (
                     <details className="relative">
                       <summary className="inline-flex cursor-pointer list-none items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium text-slate-200 transition-colors hover:bg-white/10">
@@ -321,23 +405,33 @@ export function OsintConsole() {
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-400">
                   Loading dossier…
                 </div>
-              ) : hasDossier === false ? (
-                <div className="rounded-2xl border border-amber-300/20 bg-amber-300/5 p-6 text-sm text-amber-100">
-                  <span className="font-medium">Identity-only city.</span> This city is in the registry but has no
-                  source-backed dossier yet — only its name, location, and population are known. Coverage stays an
-                  explicit gap rather than a fabricated value.
-                </div>
               ) : (
                 <>
-                  {coverage ? <CoveragePanel coverage={coverage} /> : null}
-                  {entities && entities.some((e) => e.exactSite && e.latitude != null && e.longitude != null) ? (
-                    <EntityMiniMap entities={entities} />
+                  {intelligence ? (
+                    <>
+                      <CityEvidencePanel intelligence={intelligence} />
+                      <CityTimeMachine intelligence={intelligence} />
+                    </>
                   ) : null}
-                  {grouped.length > 1 ? (
-                    <EntityTypeFilter grouped={grouped} active={typeFilter} onToggle={toggleType} />
-                  ) : null}
-                  <EntitiesPanel grouped={filteredGrouped} total={shownTotal} />
-                  {sources.length > 0 ? <SourcesPanel sources={sources} /> : null}
+                  {hasDossier === false ? (
+                    <div className="rounded-lg border border-amber-300/20 bg-amber-300/5 p-6 text-sm text-amber-100">
+                      <span className="font-medium">Identity-only city.</span> This city has a canonical registry
+                      baseline but no resolved infrastructure or institution entities yet. Missing observations
+                      remain explicit rather than fabricated.
+                    </div>
+                  ) : (
+                    <>
+                      {coverage ? <CoveragePanel coverage={coverage} /> : null}
+                      {entities && entities.some((e) => e.exactSite && e.latitude != null && e.longitude != null) ? (
+                        <EntityMiniMap entities={entities} />
+                      ) : null}
+                      {grouped.length > 1 ? (
+                        <EntityTypeFilter grouped={grouped} active={typeFilter} onToggle={toggleType} />
+                      ) : null}
+                      <EntitiesPanel grouped={filteredGrouped} total={shownTotal} />
+                      {sources.length > 0 ? <SourcesPanel sources={sources} /> : null}
+                    </>
+                  )}
                 </>
               )}
             </div>

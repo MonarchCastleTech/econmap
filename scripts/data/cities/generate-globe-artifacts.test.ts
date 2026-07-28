@@ -322,6 +322,12 @@ describe("generateGlobeArtifacts", () => {
           sourceLabels: ["Overture Maps", "Overture Places"],
         }),
         expect.objectContaining({
+          id: "place-of-worship-observations",
+          status: "identified_public_source",
+          workspacePath: "/datasets/place-of-worship-observations",
+          sourceLabels: ["OpenStreetMap", "Overture Places"],
+        }),
+        expect.objectContaining({
           id: "overture-buildings",
           status: "identified_public_source",
           workspacePath: "/datasets/overture-buildings",
@@ -338,6 +344,27 @@ describe("generateGlobeArtifacts", () => {
     expect(globeManifest.layers.map((layer: { id: string }) => layer.id)).toEqual(
       expect.arrayContaining(["airports", "cities"]),
     );
+    expect(
+      globeManifest.layers.every(
+        (layer: { sourceContract?: { sourceUrls?: string[]; fields?: string[]; gapReason?: string } }) =>
+          Boolean(
+            layer.sourceContract?.sourceUrls?.length
+            && layer.sourceContract.fields?.length
+            && layer.sourceContract.gapReason,
+          ),
+      ),
+    ).toBe(true);
+    expect(
+      globeManifest.layers.find((layer: { id: string }) => layer.id === "cities")?.sourceContract,
+    ).toMatchObject({
+      defaultState: "observed",
+      joinMethod: "Canonical GeoNames identifier",
+    });
+    expect(
+      globeManifest.layers.find((layer: { id: string }) => layer.id === "airports")?.sourceContract,
+    ).toMatchObject({
+      defaultState: "not_observed",
+    });
     expect(airportsMeta.id).toBe("airports");
     expect(airportsSummary.featureCount).toBe(5);
     expect(baseImageryCatalog.defaultLayerId).toBe("night-lights");

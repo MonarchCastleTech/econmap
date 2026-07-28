@@ -7,6 +7,7 @@ const RESOLVED_DIR = path.join(process.cwd(), "data", "raw", "cities", "resolved
 
 type CityRegistryEntry = {
   cityId: string;
+  placeClass?: "city" | "subordinate_place";
   slug: string;
   name: string;
   countryIso2: string;
@@ -164,17 +165,37 @@ export async function resolveEntities(options: ResolveEntitiesOptions = {}) {
   await fs.mkdir(resolvedDir, { recursive: true });
 
   const registry = JSON.parse(await fs.readFile(registryFile, "utf-8")) as CityRegistryEntry[];
+  const canonicalCities = registry.filter((city) => city.placeClass !== "subordinate_place");
+  const factCityIds = new Set(
+    (await fs.readdir(factsDir, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+      .map((entry) => path.basename(entry.name, ".json")),
+  );
+  const resolvedCityIds = forceRebuild
+    ? new Set<string>()
+    : new Set(
+        (await fs.readdir(resolvedDir, { withFileTypes: true }))
+          .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+          .map((entry) => path.basename(entry.name, ".json")),
+      );
 
   let resolvedCount = 0;
   let skippedCount = 0;
+  let withoutFactsCount = 0;
 
-  for (const city of registry) {
+  for (const city of canonicalCities) {
     const factFile = path.join(factsDir, `${city.cityId}.json`);
     const resolvedFile = path.join(resolvedDir, `${city.cityId}.json`);
 
+    // Cities without matched source entities intentionally have no fact file. They remain
+    // searchable and receive a registry-backed dossier with explicit source gaps in the app.
+    if (!factCityIds.has(city.cityId)) {
+      withoutFactsCount++;
+      continue;
+    }
+
     // Skip if already resolved (resumable)
-    const resolvedExists = !forceRebuild && (await fs.access(resolvedFile).then(() => true).catch(() => false));
-    if (resolvedExists && !forceRebuild) {
+    if (resolvedCityIds.has(city.cityId)) {
       skippedCount++;
       continue;
     }
@@ -187,7 +208,7 @@ export async function resolveEntities(options: ResolveEntitiesOptions = {}) {
         const hasExactCoords = e.lat !== undefined && e.lon !== undefined && e.lat !== 0 && e.lon !== 0;
 
         let presenceType = "office";
-        let entityType = e.type as ResolvedEntity["entityType"];
+        const entityType = e.type as ResolvedEntity["entityType"];
 
         switch (e.type) {
           case "airport":
@@ -263,7 +284,9 @@ export async function resolveEntities(options: ResolveEntitiesOptions = {}) {
     }
   }
 
-  logger.log(`Entity resolution completed: ${resolvedCount} cities resolved, ${skippedCount} skipped (already cached).`);
+  logger.log(
+    `Entity resolution completed: ${resolvedCount} cities resolved, ${skippedCount} skipped (already cached), ${withoutFactsCount} without entity facts.`,
+  );
 }
 
 if (require.main === module) {

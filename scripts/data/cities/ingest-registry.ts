@@ -48,6 +48,22 @@ type IngestRegistryOptions = {
   logger?: Pick<Console, "log">;
 };
 
+function attachLinkedSourceId(city: GeoNamesCityRecord, value: string) {
+  const wikidataMatch = value.match(/(?:wikidata\.org\/wiki\/)?(Q\d+)$/i);
+  if (wikidataMatch) {
+    city.sourceIds.wikidata = wikidataMatch[1].toUpperCase();
+    return true;
+  }
+
+  const osmMatch = value.match(/openstreetmap\.org\/(node|way|relation)\/(\d+)\/?$/i);
+  if (osmMatch) {
+    city.sourceIds.osm = `${osmMatch[1].toLowerCase()}/${osmMatch[2]}`;
+    return true;
+  }
+
+  return false;
+}
+
 async function loadCountryInfo(filePath: string) {
   const content = await fs.readFile(filePath, "utf-8");
   const entries = new Map<string, CountryInfo>();
@@ -191,6 +207,10 @@ export async function ingestRegistry(options: IngestRegistryOptions = {}) {
 
     const city = registryByGeonameId.get(parsedAlias.geonameId);
     if (!city) {
+      continue;
+    }
+
+    if (parsedAlias.isoLanguage === "link" && attachLinkedSourceId(city, parsedAlias.alternateName)) {
       continue;
     }
 

@@ -94,7 +94,13 @@ export function LayerEvidenceTable({
             </div>
             <div className="flex flex-wrap gap-2">
               {row.sources.length > 0 ? (
-                row.sources.map((source) => <SourceBadge key={`${row.id}:${source.id}`} source={source} compact />)
+                row.sources.map((source, sourceIndex) => (
+                  <SourceBadge
+                    key={`${row.id}:${source.id}:${sourceIndex}`}
+                    source={source}
+                    compact
+                  />
+                ))
               ) : row.sourceLabels?.length ? (
                 row.sourceLabels.map((label) => (
                   <span

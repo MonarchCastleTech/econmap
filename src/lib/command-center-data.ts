@@ -160,6 +160,7 @@ const DATASET_SOURCE_ALIASES: Partial<Record<string, string[]>> = {
   "overture-divisions": ["Overture Maps", "Overture Divisions"],
   "overture-places": ["Overture Maps", "Overture Places"],
   "overture-transportation": ["Overture Maps", "Overture Transportation"],
+  "place-of-worship-observations": ["OpenStreetMap", "Overture Places", "Place of Worship"],
   oecd: ["OECD", "OECD FUA Economy", "OECD FUA Labour"],
   ookla: ["Ookla"],
   ourairports: ["OurAirports"],
@@ -189,8 +190,10 @@ function normalizeQuery(query: string) {
 }
 
 function scoreSearchEntry(entry: CitySearchIndexEntry, normalizedQuery: string) {
+  const cityClassBoost = entry.placeClass === "subordinate_place" ? 0 : 100_000_000;
+
   if (!normalizedQuery) {
-    return (entry.population ?? 0) + (entry.isMajorCity ? 50000 : 0);
+    return cityClassBoost + (entry.population ?? 0) + (entry.isMajorCity ? 50000 : 0);
   }
 
   const aliases = entry.aliases ?? [];
@@ -202,15 +205,15 @@ function scoreSearchEntry(entry: CitySearchIndexEntry, normalizedQuery: string) 
   const majorCityBoost = entry.isMajorCity ? 100000 : 0;
 
   if (haystacks.some((value) => value === normalizedQuery)) {
-    return 10_000_000 + majorCityBoost + (entry.population ?? 0);
+    return cityClassBoost + 10_000_000 + majorCityBoost + (entry.population ?? 0);
   }
 
   if (haystacks.some((value) => value.startsWith(normalizedQuery))) {
-    return 5_000_000 + majorCityBoost + (entry.population ?? 0);
+    return cityClassBoost + 5_000_000 + majorCityBoost + (entry.population ?? 0);
   }
 
   if (haystacks.some((value) => value.includes(normalizedQuery))) {
-    return 1_000_000 + majorCityBoost + (entry.population ?? 0);
+    return cityClassBoost + 1_000_000 + majorCityBoost + (entry.population ?? 0);
   }
 
   return -1;
@@ -834,6 +837,50 @@ function normalizeCommandCenterWorkspace(
   });
 }
 
+function buildRegistryOnlyWorkspace(city: CityRegistryEntry): CityWorkspace {
+  const registrySource: CityWorkspace["sources"][number] = {
+    id: city.registrySource.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    name: city.registrySource,
+    updatedAt: new Date().toISOString().slice(0, 10),
+    coverage: "global",
+    methodology: "Canonical city identity, coordinates, hierarchy, and population from the registry source.",
+    coverageState: "verified_exact",
+    url: city.registrySource === "GeoNames" ? "https://www.geonames.org/" : undefined,
+  };
+  const populationMetric: CityWorkspace["economicFactbook"] =
+    city.population == null
+      ? []
+      : [
+          {
+            indicatorId: "population",
+            value: city.population,
+            unit: "persons",
+            status: "actual",
+            source: registrySource,
+          },
+        ];
+
+  return {
+    city,
+    summary: `${city.name} registry-backed OSINT workspace; unavailable enrichments are reported as coverage gaps.`,
+    roleTags: city.roleTags ?? [],
+    coverage: {
+      economicFactbook: populationMetric.length > 0 ? "verified_exact" : "not_covered_yet",
+      investorIntel: "not_covered_yet",
+      urbanIntel: "not_covered_yet",
+    },
+    economicFactbook: populationMetric,
+    investorIntel: [],
+    urbanIntel: [],
+    entityCounts: {},
+    entityHighlights: [],
+    mapLayerSummary: {
+      availableLayers: ["cities"],
+    },
+    sources: [registrySource],
+  };
+}
+
 export async function loadCommandCenterCityPanel(
   request?: string | CommandCenterCityPanelRequest,
 ): Promise<CommandCenterCityPanel | null> {
@@ -851,18 +898,17 @@ export async function loadCommandCenterCityPanel(
     loadCityIntelEnrichmentIndex(),
     loadWorldBankCountryEconomyIndex(),
   ]);
-  const enrichedWorkspace = workspace
-    ? applyCityIntelEnrichment({
-        city,
-        workspace,
-        enrichmentEntry: enrichmentIndex.cities[city.cityId] ?? null,
-        worldBankCountryEconomyIndex,
-      })
-    : null;
+  const baseWorkspace = workspace ?? buildRegistryOnlyWorkspace(city);
+  const enrichedWorkspace = applyCityIntelEnrichment({
+    city,
+    workspace: baseWorkspace,
+    enrichmentEntry: enrichmentIndex.cities[city.cityId] ?? null,
+    worldBankCountryEconomyIndex,
+  });
 
   return {
     city,
-    workspace: enrichedWorkspace ? normalizeCommandCenterWorkspace(enrichedWorkspace, coverageShell) : null,
+    workspace: normalizeCommandCenterWorkspace(enrichedWorkspace, coverageShell),
     coverageShell,
     entities,
     sources,

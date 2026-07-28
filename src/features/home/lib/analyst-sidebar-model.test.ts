@@ -156,6 +156,37 @@ describe("buildCommandCenterCityAnalystNavigation (live analyst model)", () => {
     expect(hospitals?.state).toBe("missing");
   });
 
+  it("does not infer 5G coverage from generic mobile broadband evidence", () => {
+    const fiveG = findRow(nav.telecomConnectivity, "5g-coverage");
+    expect(fiveG?.state).toBe("missing");
+    expect(fiveG?.mappedCount).toBe(0);
+  });
+
+  it("tracks places of worship as queued when a public POI source is identified", () => {
+    const manifestWithPlaces = {
+      ...manifest,
+      datasetInventory: [
+        ...manifest.datasetInventory,
+        {
+          id: "place-of-worship-observations",
+          label: "Place of Worship Observations",
+          status: "identified_public_source" as const,
+          sourceLabels: ["Overture Maps", "Overture Places"],
+          detail: "Global places foundation",
+          websiteSurfaces: [],
+        },
+      ],
+    } as unknown as CommandCenterManifest;
+    const navigation = buildCommandCenterCityAnalystNavigation({
+      panel,
+      commandCenterManifest: manifestWithPlaces,
+    });
+    const worship = findRow(navigation.institutionsPublicServices, "places-of-worship");
+
+    expect(worship?.state).toBe("queued");
+    expect(worship?.sourceLabels).toContain("Overture Places");
+  });
+
   it("collects queued and missing rows into the explicit missing-coverage section", () => {
     const ids = nav.missingCoverage.rows.map((row) => row.id);
     expect(ids).toContain("ixps");

@@ -10,12 +10,19 @@ const GENERATED_DIR = path.join(process.cwd(), 'src', 'data', 'generated', 'citi
 const REGISTRY_FILE = path.join(GENERATED_DIR, 'registry.json');
 const OUT_FILE = path.join(GENERATED_DIR, 'slug-meta.json');
 
-type RegistryEntry = { slug: string; name: string; countryIso3: string; population?: number | null };
+type RegistryEntry = {
+  slug: string;
+  name: string;
+  countryIso3: string;
+  placeClass?: "city" | "subordinate_place";
+  population?: number | null;
+};
 
 function main() {
   const registry: RegistryEntry[] = JSON.parse(fs.readFileSync(REGISTRY_FILE, 'utf-8'));
   const out: Record<string, { n: string; i: string; p: number }> = {};
   for (const city of registry) {
+    if (city.placeClass === "subordinate_place") continue;
     out[city.slug] = { n: city.name, i: city.countryIso3, p: city.population ?? 0 };
   }
   fs.writeFileSync(OUT_FILE, JSON.stringify(out));

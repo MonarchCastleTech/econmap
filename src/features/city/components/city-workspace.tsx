@@ -1,12 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import type { CityIntelligenceBundle } from "@/domain/city-intelligence-schemas";
 import type {
   CommandCenterCityPanel,
   CommandCenterManifest,
   CommandCenterCityWorkspace,
   SourceMeta,
 } from "@/domain/types";
+import { CityEvidencePanel } from "@/features/osint/components/city-evidence-panel";
+import { CityTimeMachine } from "@/features/osint/components/city-time-machine";
 import { buildCommandCenterCityAnalystNavigation } from "@/features/home/lib/analyst-sidebar-model";
+import { loadCityIntelligence } from "@/lib/city-intelligence-client";
 
 import { EntityCard } from "./entity-card";
 import {
@@ -94,7 +100,6 @@ function formatIndicatorLabel(indicatorId: string) {
     })
     .join(" ");
 }
-
 function formatMetricValue(value: number | null, unit: string) {
   if (value === null) {
     return "Not covered";
@@ -211,7 +216,7 @@ function buildMissingCoverageRows(
   return navigation.missingCoverage.rows.map((row) => ({
     id: `gap:${row.id}`,
     label: row.label,
-    value: analystStateLabels[row.state],
+    value: row.id === "5g-coverage" ? "Unknown" : analystStateLabels[row.state],
     detail:
       row.state === "queued"
         ? `${row.detail ?? "Dataset ingestion is in progress."} ${row.queuedDatasetCount} queued dataset${
@@ -250,6 +255,17 @@ function sortEntities(entities: NonNullable<CommandCenterCityPanel["entities"]>[
 
 export function CityWorkspace({ commandCenterManifest, panel }: CityWorkspaceProps) {
   const workspace = panel.workspace;
+  const [intelligence, setIntelligence] = useState<CityIntelligenceBundle | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadCityIntelligence(panel.city.cityId).then((bundle) => {
+      if (!cancelled) setIntelligence(bundle);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [panel.city.cityId]);
 
   if (!workspace) {
     return (
@@ -410,6 +426,13 @@ export function CityWorkspace({ commandCenterManifest, panel }: CityWorkspacePro
             </div>
           ) : null}
         </header>
+
+        {intelligence?.cityId === panel.city.cityId ? (
+          <>
+            <CityEvidencePanel intelligence={intelligence} />
+            <CityTimeMachine intelligence={intelligence} />
+          </>
+        ) : null}
 
         <OsintDossierSection
           id="economic-factbook"

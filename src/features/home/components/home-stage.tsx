@@ -13,6 +13,7 @@ import type {
 } from "@/domain/types";
 import { TacticalMap2D, type TacticalFocusCity } from "@/features/home/components/tactical-map-2d";
 import { assetUrl } from "@/lib/asset-url";
+import { rankCitySearchEntries } from "@/lib/city-search";
 import {
   TacticalSidebar,
   type TacticalSidebarEntityRow,
@@ -874,21 +875,7 @@ export function HomeStage({
 
     // One fetch + one JSON.parse per session (cached module-level), then filter the in-memory array.
     void getClientSearchIndex()
-      .then((allEntries) => {
-        // Client-side filter matching the server-side search logic
-        const normalizedQuery = normalizedSearchQuery.toLowerCase();
-        return allEntries
-          .filter((entry) => {
-            const nameMatch = entry.name.toLowerCase().includes(normalizedQuery);
-            const aliasMatch = entry.aliases?.some((alias: string) =>
-              alias.toLowerCase().includes(normalizedQuery),
-            );
-            const countryMatch = entry.countryIso3.toLowerCase().includes(normalizedQuery);
-            const adminMatch = entry.admin1Name?.toLowerCase().includes(normalizedQuery);
-            return nameMatch || aliasMatch || countryMatch || adminMatch;
-          })
-          .slice(0, 20);
-      })
+      .then((allEntries) => rankCitySearchEntries(allEntries, normalizedSearchQuery))
       .then((nextResults) => {
         if (cancelled) {
           return;

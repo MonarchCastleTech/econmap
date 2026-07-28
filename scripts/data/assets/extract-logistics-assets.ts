@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { parseUnlocodeCsv } from '../cities/parsers/unlocode-parser';
+import { getBulkSourceManifest } from '../cities/bulk-source-manifest';
 import { AssetRecord } from '../../../src/domain/types';
 
-const UNLOCODE_DIR = 'data/raw/cities/bulk/unlocode/loc242csv';
 const CITY_REGISTRY_PATH = 'data/raw/cities/bulk/iso_mapping.json';
 const OUTPUT_DIR = 'data/processed/assets';
 const MANIFEST_PATH = path.join(OUTPUT_DIR, 'manifest.json');
@@ -50,21 +50,18 @@ async function extractLogisticsAssets() {
       const content = fs.readFileSync(path.join(OUTPUT_DIR, file), 'utf-8');
       try {
         assetsByCountry[iso3] = JSON.parse(content);
-      } catch (e) {
+      } catch {
         assetsByCountry[iso3] = [];
       }
     }
   }
 
-  // Parse UNLOCODE Parts 1-3
-  const parts = [
-    '2024-2 UNLOCODE CodeListPart1.csv',
-    '2024-2 UNLOCODE CodeListPart2.csv',
-    '2024-2 UNLOCODE CodeListPart3.csv'
-  ];
+  // Parse UN/LOCODE Parts 1-3 from the canonical bulk-source manifest.
+  const unlocode = getBulkSourceManifest().unlocode;
+  const parts = [unlocode.part1.absolutePath, unlocode.part2.absolutePath, unlocode.part3.absolutePath];
 
-  for (const part of parts) {
-    const partPath = path.join(UNLOCODE_DIR, part);
+  for (const partPath of parts) {
+    const part = path.basename(partPath);
     if (!fs.existsSync(partPath)) {
       console.warn(`UNLOCODE part not found: ${partPath}`);
       continue;
@@ -110,7 +107,11 @@ async function extractLogisticsAssets() {
   }
 
   // Save to output
-  const manifest: any = fs.existsSync(MANIFEST_PATH) ? JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) : {};
+  const manifest = (
+    fs.existsSync(MANIFEST_PATH)
+      ? JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'))
+      : {}
+  ) as Record<string, Record<string, unknown>>;
 
   for (const iso3 of Object.keys(assetsByCountry)) {
     // Filter duplicates

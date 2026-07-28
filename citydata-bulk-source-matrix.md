@@ -45,10 +45,11 @@ The correct approach is:
   - Covers: airports, scheduled service, runways, municipality, region join
 - UN/LOCODE
   - Local:
-    - `data/raw/cities/bulk/unlocode/loc242csv/2024-2 UNLOCODE CodeListPart1.csv`
-    - `data/raw/cities/bulk/unlocode/loc242csv/2024-2 UNLOCODE CodeListPart2.csv`
-    - `data/raw/cities/bulk/unlocode/loc242csv/2024-2 UNLOCODE CodeListPart3.csv`
-    - `data/raw/cities/bulk/unlocode/loc242csv/2024-2 SubdivisionCodes.csv`
+    - `data/raw/cities/bulk/unlocode/2025-1/release/csv/UNLOCODE CodeListPart1.csv`
+    - `data/raw/cities/bulk/unlocode/2025-1/release/csv/UNLOCODE CodeListPart2.csv`
+    - `data/raw/cities/bulk/unlocode/2025-1/release/csv/UNLOCODE CodeListPart3.csv`
+    - `data/raw/cities/bulk/unlocode/2025-1/release/csv/SubdivisionCodes.csv`
+  - Official release: `https://unlocode.unece.org/publications/`
   - Covers: ports, airports, rail/transport functions, location codes, subdivisions, coordinates
 - WRI Global Power Plant Database
   - Local: `data/raw/cities/bulk/wri/global_power_plant_database.csv`
@@ -59,6 +60,26 @@ The correct approach is:
     - `data/raw/cities/bulk/worldportindex/wpi_data_download/wpi_data_download/WPI.csv`
     - `data/raw/cities/bulk/worldportindex/wpi_data_download/WPI_Explanation_of_Data_Fields.pdf`
   - Covers: richer port facilities, services, physical characteristics, harbour metadata, and port explanatory fields
+
+### Civic places and places of worship
+
+- Place of worship observations
+  - Identified sources:
+    - OpenStreetMap `amenity=place_of_worship` and related religion/denomination tags
+    - Overture Places categories and source lineage
+  - Fields when published: name, religion, denomination, building type, operator, opening hours,
+    service times, website, phone, address, coordinates, and source IDs
+  - Coverage rule: `unknown` until a city-specific observation is ingested; an absent match is not
+    evidence that a city has no place of worship
+  - Source docs:
+    - `https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dplace_of_worship`
+    - `https://docs.overturemaps.org/guides/places/`
+
+### Telecom coverage
+
+- Ookla fixed/mobile performance is a speed-observation source, not a radio-technology inventory.
+- 5G remains `unknown` unless operator, regulator, or technology-tagged city observations are
+  published. Generic mobile speed must not be relabeled as 5G coverage.
 
 ### Urban display / map layers
 

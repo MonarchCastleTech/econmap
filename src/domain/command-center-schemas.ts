@@ -70,6 +70,20 @@ export const globeLayerManifestSchema = z.object({
   featureCount: z.number().int().positive().optional(),
   defaultOpacity: z.number().min(0).max(1).optional(),
   refreshedAt: z.string().optional(),
+  sourceContract: z.object({
+    sourceUrls: z.array(z.string().url()).min(1),
+    scope: z.string(),
+    joinMethod: z.string(),
+    fields: z.array(z.string()).min(1),
+    defaultState: z.enum([
+      "observed",
+      "not_observed",
+      "unknown",
+      "unavailable",
+      "not_applicable",
+    ]),
+    gapReason: z.string(),
+  }).optional(),
 });
 
 export const tacticalLayerSchema = z.object({

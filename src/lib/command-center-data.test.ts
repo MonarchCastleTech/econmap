@@ -183,6 +183,41 @@ describe("command-center-data", () => {
     expect(results.map((result) => result.slug)).toEqual(["izmir", "izmit"]);
   });
 
+  it("ranks cities ahead of subordinate places without hiding either result", async () => {
+    loadCitySearchIndex.mockResolvedValue([
+      {
+        cityId: "geo-district",
+        slug: "geo-district-sample",
+        name: "Sample",
+        aliases: [],
+        countryIso3: "TST",
+        population: 2_000_000,
+        isMajorCity: false,
+        placeClass: "subordinate_place",
+        featureCode: "PPLX",
+      },
+      {
+        cityId: "geo-city",
+        slug: "geo-city-sample",
+        name: "Sample",
+        aliases: [],
+        countryIso3: "TST",
+        population: 200_000,
+        isMajorCity: false,
+        placeClass: "city",
+        featureCode: "PPL",
+      },
+    ]);
+
+    const commandCenterData = await import("./command-center-data");
+    const results = await commandCenterData.searchCommandCenterCities("sample");
+
+    expect(results.map((result) => result.slug)).toEqual([
+      "geo-city-sample",
+      "geo-district-sample",
+    ]);
+  });
+
   it("loads the city panel from a known city id without reopening the full registry", async () => {
     loadCityWorkspace.mockResolvedValue({
       city: {
@@ -253,6 +288,62 @@ describe("command-center-data", () => {
     expect(loadCityCoverageShell).toHaveBeenCalledWith("geo-1");
     expect(panel?.city.slug).toBe("izmir");
     expect(panel?.coverageShell?.boundaryStatus).toBe("point_only");
+  });
+
+  it("builds an honest registry-only OSINT workspace when a city has no enrichment file", async () => {
+    const city = {
+      cityId: "geo-999",
+      slug: "geo-999-mus",
+      name: "Muş",
+      aliases: ["Mus"],
+      placeClass: "city" as const,
+      featureClass: "P" as const,
+      featureCode: "PPLA",
+      sourceIds: { geonames: "999" },
+      countryIso2: "TR",
+      countryIso3: "TUR",
+      countrySlug: "turkiye",
+      admin1Name: "Muş",
+      admin1Code: "49",
+      latitude: 38.9462,
+      longitude: 41.7539,
+      boundaryStatus: "point_only" as const,
+      population: 82536,
+      populationSource: "GeoNames",
+      registrySource: "GeoNames",
+      recordStatus: "active" as const,
+      isMajorCity: true,
+    };
+
+    loadCityWorkspace.mockResolvedValue(null);
+    findCityBySlug.mockResolvedValue(city);
+    loadCityCoverageShell.mockResolvedValue(null);
+    loadCityEntities.mockResolvedValue(null);
+    loadCitySources.mockResolvedValue(null);
+    readFile.mockRejectedValue(new Error("optional enrichment not generated"));
+
+    const commandCenterData = await import("./command-center-data");
+    const panel = await commandCenterData.loadCommandCenterCityPanel({
+      slug: city.slug,
+      cityId: city.cityId,
+    });
+
+    expect(panel?.workspace).not.toBeNull();
+    expect(panel?.workspace?.summary).toContain("registry-backed");
+    expect(panel?.workspace?.economicFactbook).toEqual([
+      expect.objectContaining({
+        indicatorId: "population",
+        value: 82536,
+        status: "actual",
+      }),
+    ]);
+    expect(panel?.workspace?.sources).toEqual([
+      expect.objectContaining({
+        id: "geonames",
+        name: "GeoNames",
+        coverageState: "verified_exact",
+      }),
+    ]);
   });
 
   it("merges generated city enrichment metrics into the selected city panel", async () => {

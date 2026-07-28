@@ -21,6 +21,8 @@ type GenerateArtifactsOptions = {
   maxCombinedEntityFeatures?: number;
   maxLayerStringifyFeatures?: number;
   skipPerCityOutputs?: boolean;
+  resolvedReadConcurrency?: number;
+  cityWriteConcurrency?: number;
 };
 
 const DEFAULT_OUT_DIR = path.join(process.cwd(), "src", "data", "generated", "cities");
@@ -28,6 +30,8 @@ const DEFAULT_REGISTRY_FILE = path.join(DEFAULT_OUT_DIR, "registry.json");
 const DEFAULT_RESOLVED_DIR = path.join(process.cwd(), "data", "raw", "cities", "resolved");
 const DEFAULT_MAX_COMBINED_ENTITY_FEATURES = 250_000;
 const DEFAULT_MAX_LAYER_STRINGIFY_FEATURES = 25_000;
+const DEFAULT_RESOLVED_READ_CONCURRENCY = 32;
+const DEFAULT_CITY_WRITE_CONCURRENCY = 16;
 const COMBINED_ENTITIES_SKIPPED_WARNING =
   "Skipped combined entities GeoJSON because feature count exceeded the configured threshold.";
 const FEATURED_CITY_TARGETS = [
@@ -46,6 +50,8 @@ type CityRegistryEntry = {
   slug: string;
   name: string;
   aliases?: string[];
+  placeClass?: "city" | "subordinate_place";
+  featureCode?: string;
   countryIso2: string;
   countryIso3: string;
   countrySlug: string;
@@ -197,6 +203,8 @@ function buildSearchIndex(registry: CityRegistryEntry[]) {
     slug: city.slug,
     name: city.name,
     aliases: city.aliases ?? [],
+    placeClass: city.placeClass ?? "city",
+    featureCode: city.featureCode,
     countryIso3: city.countryIso3,
     admin1Name: city.admin1Name,
     population: city.population ?? null,
@@ -600,6 +608,28 @@ async function writeFeatureCollectionFile(
   }
 }
 
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>,
+) {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const workerCount = Math.min(Math.max(1, Math.trunc(concurrency)), items.length);
+
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (cursor < items.length) {
+        const index = cursor;
+        cursor += 1;
+        results[index] = await mapper(items[index], index);
+      }
+    }),
+  );
+
+  return results;
+}
+
 export async function generateArtifacts(options: GenerateArtifactsOptions = {}) {
   const outDir = options.outDir ?? DEFAULT_OUT_DIR;
   const registryFile = options.registryFile ?? DEFAULT_REGISTRY_FILE;
@@ -611,6 +641,12 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
   const maxLayerStringifyFeatures =
     options.maxLayerStringifyFeatures ?? DEFAULT_MAX_LAYER_STRINGIFY_FEATURES;
   const skipPerCityOutputs = options.skipPerCityOutputs ?? false;
+  const resolvedReadConcurrency =
+    options.resolvedReadConcurrency ?? DEFAULT_RESOLVED_READ_CONCURRENCY;
+  const cityWriteConcurrency = Math.max(
+    1,
+    Math.trunc(options.cityWriteConcurrency ?? DEFAULT_CITY_WRITE_CONCURRENCY),
+  );
 
   const outWorkspaces = path.join(outDir, "workspaces");
   const outEntities = path.join(outDir, "entities");
@@ -630,6 +666,31 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
   await fs.mkdir(outCommandCenterDir, { recursive: true });
 
   const registry = JSON.parse(await fs.readFile(registryFile, "utf-8")) as CityRegistryEntry[];
+  const canonicalCities = registry.filter((city) => city.placeClass !== "subordinate_place");
+  const resolvedCityIds = new Set(
+    (await fs.readdir(resolvedDir, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+      .map((entry) => path.basename(entry.name, ".json")),
+  );
+  const resolvedEntries = await mapWithConcurrency(
+    canonicalCities.filter((city) => resolvedCityIds.has(city.cityId)),
+    resolvedReadConcurrency,
+    async (city) => {
+      try {
+        const resolved = JSON.parse(
+          await fs.readFile(path.join(resolvedDir, `${city.cityId}.json`), "utf-8"),
+        ) as ResolvedCity;
+        return [city.cityId, resolved] as const;
+      } catch {
+        return [city.cityId, null] as const;
+      }
+    },
+  );
+  const resolvedByCityId = new Map<string, ResolvedCity>(
+    resolvedEntries.filter(
+      (entry): entry is readonly [string, ResolvedCity] => entry[1] !== null,
+    ),
+  );
 
   const cityGeoJson = {
     type: "FeatureCollection",
@@ -654,21 +715,17 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
   };
   const layerEntities: Record<string, Array<Record<string, unknown>>> = {};
   const searchIndex = buildSearchIndex(registry);
-  const featuredCities = buildFeaturedCities(registry);
+  const featuredCities = buildFeaturedCities(canonicalCities);
   const buildWarnings: string[] = [];
   let combinedEntityFeatures: Array<Record<string, unknown>> | null = [];
   const publishedExactSiteKeys = new Set<string>();
   let coverageShellCount = 0;
+  let pendingCityWrites: Array<Promise<void>> = [];
 
-  for (const city of registry) {
-    const resolvedFile = path.join(resolvedDir, `${city.cityId}.json`);
-    let resolved: ResolvedCity | null = null;
-
-    try {
-      resolved = JSON.parse(await fs.readFile(resolvedFile, "utf-8")) as ResolvedCity;
+  for (const city of canonicalCities) {
+    const resolved = resolvedByCityId.get(city.cityId) ?? null;
+    if (resolved) {
       processedCount++;
-    } catch {
-      resolved = null;
     }
 
     cityGeoJson.features.push({
@@ -728,37 +785,46 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
     // the published artifact tree to ~tens of thousands of files instead of all 189K.
     if (!skipPerCityOutputs && resolved) {
       const prioritizedEntities = sortEntitiesForCityIntel(resolved?.entities ?? []);
-      await fs.writeFile(
-        path.join(outWorkspaces, `${city.cityId}.json`),
-        JSON.stringify(workspace, null, 2),
+      pendingCityWrites.push(
+        Promise.all([
+          fs.writeFile(
+            path.join(outWorkspaces, `${city.cityId}.json`),
+            JSON.stringify(workspace, null, 2),
+          ),
+          fs.writeFile(
+            path.join(outEntities, `${city.cityId}.json`),
+            JSON.stringify(
+              {
+                cityId: city.cityId,
+                entities: prioritizedEntities,
+                sources: citySources,
+              },
+              null,
+              2,
+            ),
+          ),
+          fs.writeFile(
+            path.join(outSources, `${city.cityId}.json`),
+            JSON.stringify(
+              {
+                cityId: city.cityId,
+                sources: citySources,
+              },
+              null,
+              2,
+            ),
+          ),
+          fs.writeFile(
+            path.join(outCoverage, `${city.cityId}.json`),
+            JSON.stringify(coverageShell, null, 2),
+          ),
+        ]).then(() => undefined),
       );
-      await fs.writeFile(
-        path.join(outEntities, `${city.cityId}.json`),
-        JSON.stringify(
-          {
-            cityId: city.cityId,
-            entities: prioritizedEntities,
-            sources: citySources,
-          },
-          null,
-          2,
-        ),
-      );
-      await fs.writeFile(
-        path.join(outSources, `${city.cityId}.json`),
-        JSON.stringify(
-          {
-            cityId: city.cityId,
-            sources: citySources,
-          },
-          null,
-          2,
-        ),
-      );
-      await fs.writeFile(
-        path.join(outCoverage, `${city.cityId}.json`),
-        JSON.stringify(coverageShell, null, 2),
-      );
+
+      if (pendingCityWrites.length >= cityWriteConcurrency) {
+        await Promise.all(pendingCityWrites);
+        pendingCityWrites = [];
+      }
     }
 
     for (const entity of resolved?.entities ?? []) {
@@ -816,6 +882,8 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
     }
   }
 
+  await Promise.all(pendingCityWrites);
+
   await fs.writeFile(path.join(outDir, "search-index.json"), JSON.stringify(searchIndex, null, 2));
   await fs.writeFile(
     path.join(outCommandCenterDir, "featured-cities.json"),
@@ -859,7 +927,7 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
     );
   }
 
-  const countryCounts = registry.reduce<Record<string, number>>((counts, city) => {
+  const countryCounts = canonicalCities.reduce<Record<string, number>>((counts, city) => {
     counts[city.countryIso3] = (counts[city.countryIso3] ?? 0) + 1;
     return counts;
   }, {});
@@ -867,14 +935,15 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
   const manifest = {
     schemaVersion: "2.0.0",
     generatedAt,
-    totalCityCount: registry.length,
+    totalPlaceCount: registry.length,
+    totalCityCount: canonicalCities.length,
     processedCityCount: processedCount,
     countryCounts,
     entityCountsByType,
     exactSiteCountsByType,
     exactSiteCount,
     cityPresenceCount,
-    unresolvedCoverageCount: registry.length - processedCount,
+    unresolvedCoverageCount: canonicalCities.length - processedCount,
     sourceCounts,
     coverageShellCount,
     coverageShellBoundaryCounts,
@@ -883,9 +952,38 @@ export async function generateArtifacts(options: GenerateArtifactsOptions = {}) 
   };
 
   await fs.writeFile(path.join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2));
+  await fs.writeFile(
+    path.join(outDir, "coverage-report.json"),
+    JSON.stringify(
+      {
+        schemaVersion: "1.0.0",
+        generatedAt,
+        totalPlaceCount: registry.length,
+        totalCityCount: canonicalCities.length,
+        baselineCityCount: coverageShellCount,
+        processedCityCount: processedCount,
+        sourceObservedCityCount: processedCount,
+        unresolvedCityCount: canonicalCities.length - processedCount,
+        failedCityCount: 0,
+        states: {
+          baseline:
+            "A canonical registry record exists; this does not imply sparse OSINT observations.",
+          sourceObserved:
+            "At least one resolved source-data record exists for the city.",
+          unresolved:
+            "No resolved source-data record exists yet; absence is not a negative fact.",
+          failed:
+            "Artifact generation failed for the city and requires retry.",
+        },
+      },
+      null,
+      2,
+    ),
+  );
 
   logger.log("=== Artifact Generation Summary ===");
-  logger.log(`Total cities: ${registry.length}`);
+  logger.log(`Total cities: ${canonicalCities.length}`);
+  logger.log(`Searchable populated places: ${registry.length}`);
   logger.log(`Processed cities: ${processedCount}`);
   logger.log(`Exact-site entities: ${exactSiteCount}`);
   logger.log(`City-presence entities: ${cityPresenceCount}`);

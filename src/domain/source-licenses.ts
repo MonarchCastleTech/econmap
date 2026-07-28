@@ -31,6 +31,12 @@ export const SOURCE_LICENSES: Record<string, SourceLicense> = {
     url: "https://mrdata.usgs.gov/mrds/",
     asOf: "2011 (systematic updates ceased; US-heavy)",
   },
+  "usgs-earthquakes": {
+    label: "USGS Earthquake Hazards Program",
+    license: "U.S. Government Public Domain / CC0",
+    commercial: false,
+    url: "https://earthquake.usgs.gov/earthquakes/feed/",
+  },
   // COMMERCIAL — present in asset data today; the audit flags it so it cannot ship unlicensed.
   telegeography: {
     label: "TeleGeography Submarine Cable Map",

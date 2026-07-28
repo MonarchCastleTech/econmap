@@ -1,10 +1,24 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { CityWorkspace } from "@/features/city/components/city-workspace";
 
+vi.mock("@/lib/city-intelligence-client", () => ({
+  loadCityIntelligence: vi.fn(async (cityId: string) => ({
+    schemaVersion: "1.0",
+    generatedAt: "2026-07-28T00:00:00.000Z",
+    cityId,
+    telecomEvidence: "unknown",
+    geographies: [],
+    observations: [],
+    deltas: [],
+    alerts: [],
+    sourceStatuses: [],
+  })),
+}));
+
 describe("CityWorkspace", () => {
-  it("renders anchored dossier sections with explicit source-backed gaps", () => {
+  it("renders anchored dossier sections with explicit source-backed gaps", async () => {
     render(
       <CityWorkspace
         commandCenterManifest={{
@@ -311,6 +325,9 @@ describe("CityWorkspace", () => {
       expect(screen.getByRole("heading", { name: heading })).toBeInTheDocument();
     });
 
+    expect(screen.getByText("5G Coverage")).toBeInTheDocument();
+    expect(screen.getByText("Unknown")).toBeInTheDocument();
+
     [
       "economic-factbook",
       "logistics-transport",
@@ -337,5 +354,9 @@ describe("CityWorkspace", () => {
     expect(screen.getByText(/dossier shell/i)).toBeInTheDocument();
     expect(screen.getByText(/2 mapped \/ 3 documented \/ 1 missing/i)).toBeInTheDocument();
     expect(screen.getByText(/boundary-backed city surface is available/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Telecom and network evidence" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "City time machine" })).toBeInTheDocument();
   });
 });

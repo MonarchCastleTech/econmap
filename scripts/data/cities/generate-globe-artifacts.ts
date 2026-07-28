@@ -293,6 +293,117 @@ const LAYER_SEEDS: LayerSeed[] = [
   },
 ];
 
+type LayerSourceContract = {
+  sourceUrls: string[];
+  scope: string;
+  joinMethod: string;
+  fields: string[];
+  defaultState: "observed" | "not_observed" | "unknown" | "unavailable" | "not_applicable";
+  gapReason: string;
+};
+
+const LAYER_SOURCE_CONTRACTS: Record<string, LayerSourceContract> = {
+  cities: {
+    sourceUrls: ["https://www.geonames.org/"],
+    scope: "Global canonical city registry",
+    joinMethod: "Canonical GeoNames identifier",
+    fields: ["name", "aliases", "country", "admin hierarchy", "population", "coordinates", "feature code"],
+    defaultState: "observed",
+    gapReason: "A point record does not imply that a municipal boundary is available.",
+  },
+  airports: {
+    sourceUrls: ["https://ourairports.com/data/"],
+    scope: "Global public airport registry",
+    joinMethod: "Country-constrained name and 50 km point proximity",
+    fields: ["name", "airport type", "scheduled service", "IATA/ICAO codes", "coordinates", "runways"],
+    defaultState: "not_observed",
+    gapReason: "No matching airport in OurAirports means not observed in that source, not proof that no air facility exists.",
+  },
+  ports: {
+    sourceUrls: [
+      "https://unlocode.unece.org/publications/",
+      "https://msi.nga.mil/Publications/WPI",
+    ],
+    scope: "Trade locations and public port facilities",
+    joinMethod: "Country-constrained name and point proximity",
+    fields: ["name", "UN/LOCODE", "function codes", "coordinates", "facility attributes"],
+    defaultState: "unknown",
+    gapReason: "UN/LOCODE coordinates and optional World Port Index coverage are not complete for every city.",
+  },
+  "rail-hubs": {
+    sourceUrls: ["https://unlocode.unece.org/publications/"],
+    scope: "UN/LOCODE locations carrying the rail-terminal function",
+    joinMethod: "Country-constrained name and 30 km point proximity",
+    fields: ["name", "UN/LOCODE", "rail function", "coordinates", "status"],
+    defaultState: "unknown",
+    gapReason: "UN/LOCODE is a trade-location code list, not a complete global station inventory.",
+  },
+  "logistics-hubs": {
+    sourceUrls: ["https://unlocode.unece.org/publications/"],
+    scope: "UN/LOCODE trade and transport functions",
+    joinMethod: "Country-constrained name and 30 km point proximity",
+    fields: ["name", "UN/LOCODE", "function codes", "coordinates", "status"],
+    defaultState: "unknown",
+    gapReason: "Absence from UN/LOCODE does not establish that a city has no logistics facilities.",
+  },
+  "transit-feeds": {
+    sourceUrls: ["https://mobilitydatabase.org/"],
+    scope: "Public GTFS and mobility feeds indexed by Mobility Database",
+    joinMethod: "Provider and feed service-area city match",
+    fields: ["provider", "feed URL", "official status", "service area", "last seen"],
+    defaultState: "unknown",
+    gapReason: "A missing feed may reflect publication or indexing gaps rather than no public transport.",
+  },
+  utilities: {
+    sourceUrls: ["https://datasets.wri.org/dataset/globalpowerplantdatabase"],
+    scope: "Public utility-scale power plants",
+    joinMethod: "30 to 100 km point proximity with city-presence labeling",
+    fields: ["plant name", "capacity", "fuel", "owner", "commissioning year", "coordinates"],
+    defaultState: "unknown",
+    gapReason: "The source is not a complete inventory of distribution utilities or small generation sites.",
+  },
+  "connectivity-fixed": {
+    sourceUrls: ["https://www.speedtest.net/insights/open-data"],
+    scope: "Aggregated fixed-network performance tiles",
+    joinMethod: "Spatial tile aggregation to the city selection surface",
+    fields: ["download", "upload", "latency", "tests", "devices", "quarter"],
+    defaultState: "unknown",
+    gapReason: "Sparse or absent tests do not prove lack of fixed broadband service.",
+  },
+  "connectivity-mobile": {
+    sourceUrls: ["https://www.speedtest.net/insights/open-data"],
+    scope: "Aggregated mobile-network performance tiles",
+    joinMethod: "Spatial tile aggregation to the city selection surface",
+    fields: ["download", "upload", "latency", "tests", "devices", "quarter"],
+    defaultState: "unknown",
+    gapReason: "Mobile speed observations do not identify radio technology and cannot be treated as universal 5G coverage.",
+  },
+  "air-quality": {
+    sourceUrls: ["https://www.who.int/data/gho/data/themes/air-pollution/who-air-quality-database"],
+    scope: "WHO ambient air-quality monitoring observations",
+    joinMethod: "Country and normalized city-name match",
+    fields: ["PM2.5", "PM10", "NO2", "measurement year", "station context"],
+    defaultState: "unknown",
+    gapReason: "No matched monitor is an observation gap, not evidence of clean air.",
+  },
+  "water-stress": {
+    sourceUrls: ["https://www.wri.org/aqueduct"],
+    scope: "WRI Aqueduct gridded water-risk indicators",
+    joinMethod: "Spatial overlay with the city selection surface",
+    fields: ["baseline water stress", "drought risk", "flood risk", "scenario"],
+    defaultState: "unknown",
+    gapReason: "The layer is unavailable until licensed bulk data is ingested and spatially joined.",
+  },
+  research: {
+    sourceUrls: ["https://ror.org/"],
+    scope: "Research Organization Registry organizations",
+    joinMethod: "Country-constrained city-name and coordinate match",
+    fields: ["organization name", "type", "ROR ID", "city", "coordinates", "external identifiers"],
+    defaultState: "unknown",
+    gapReason: "ROR coverage focuses on research organizations and is not a complete education-facility inventory.",
+  },
+};
+
 type BaseImagerySeed = {
   id: string;
   label: string;
@@ -444,6 +555,25 @@ const DATASET_INVENTORY_SEEDS: DatasetInventorySeed[] = [
       {
         label: "Overture Places docs",
         purpose: "Global place and civic POI source for hospitals, schools, police, fire, and government facilities.",
+        sourceUrl: "https://docs.overturemaps.org/guides/places/",
+      },
+    ],
+  },
+  {
+    id: "place-of-worship-observations",
+    label: "Place of Worship Observations",
+    sourceLabels: ["OpenStreetMap", "Overture Places"],
+    identifiedSources: [
+      {
+        label: "OpenStreetMap place of worship tags",
+        purpose:
+          "Public observations for worship-site name, religion, denomination, building type, operator, opening hours, service times, and contact fields where contributors publish them.",
+        sourceUrl: "https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dplace_of_worship",
+      },
+      {
+        label: "Overture Places docs",
+        purpose:
+          "Global POI foundation used to cross-check place categories, names, addresses, confidence, and source lineage.",
         sourceUrl: "https://docs.overturemaps.org/guides/places/",
       },
     ],
@@ -1153,6 +1283,7 @@ export async function generateGlobeArtifacts(options: GenerateGlobeArtifactsOpti
       featureCount,
       defaultOpacity: seed.id === "cities" ? 0.9 : 0.8,
       refreshedAt: generatedAt,
+      sourceContract: LAYER_SOURCE_CONTRACTS[seed.id],
     });
 
     await fs.writeFile(path.join(layerDir, "meta.json"), JSON.stringify(layerMeta, null, 2));

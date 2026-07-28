@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "cityId": "geo-3693345",
+  "city": "Pucallpa",
+  "countryIso3": "PER",
+  "alert": "Operational hazard detected",
+  "desktopLayout": {
+    "viewportWidth": 1440,
+    "documentWidth": 1440,
+    "bodyWidth": 1440
+  },
+  "mobileLayout": {
+    "viewportWidth": 390,
+    "documentWidth": 390,
+    "bodyWidth": 390
+  },
+  "pageErrors": [],
+  "ignoredStaticPrefetchErrors": 4
+}

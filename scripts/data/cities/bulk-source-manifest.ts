@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 const BULK_ROOT = path.join(process.cwd(), "data", "raw", "cities", "bulk");
+const UNLOCODE_RELEASE_URL =
+  "https://opensource.unicc.org/un/unece/uncefact/vocab-locode/-/jobs/artifacts/2025-1/download?job=package-release";
 
 type BulkSourceEntry = {
   absolutePath: string;
@@ -248,23 +250,23 @@ export function getBulkSourceManifest(): BulkSourceManifest {
     },
     unlocode: {
       part1: buildEntry(
-        "unlocode/loc242csv/2024-2 UNLOCODE CodeListPart1.csv",
-        "https://service.unece.org/trade/locode/loc242csv.zip",
+        "unlocode/2025-1/release/csv/UNLOCODE CodeListPart1.csv",
+        UNLOCODE_RELEASE_URL,
         "UN/LOCODE part 1 for transport and trade locations.",
       ),
       part2: buildEntry(
-        "unlocode/loc242csv/2024-2 UNLOCODE CodeListPart2.csv",
-        "https://service.unece.org/trade/locode/loc242csv.zip",
+        "unlocode/2025-1/release/csv/UNLOCODE CodeListPart2.csv",
+        UNLOCODE_RELEASE_URL,
         "UN/LOCODE part 2 for transport and trade locations.",
       ),
       part3: buildEntry(
-        "unlocode/loc242csv/2024-2 UNLOCODE CodeListPart3.csv",
-        "https://service.unece.org/trade/locode/loc242csv.zip",
+        "unlocode/2025-1/release/csv/UNLOCODE CodeListPart3.csv",
+        UNLOCODE_RELEASE_URL,
         "UN/LOCODE part 3 for transport and trade locations.",
       ),
       subdivisionCodes: buildEntry(
-        "unlocode/loc242csv/2024-2 SubdivisionCodes.csv",
-        "https://service.unece.org/trade/locode/loc242csv.zip",
+        "unlocode/2025-1/release/csv/SubdivisionCodes.csv",
+        UNLOCODE_RELEASE_URL,
         "UN/LOCODE subdivision lookup table for region joins.",
       ),
     },
@@ -289,16 +291,19 @@ export function getBulkSourceManifest(): BulkSourceManifest {
         "gleif/lei2-latest.zip",
         "https://leidata.gleif.org/api/v1/concatenated-files/lei2/latest/zip",
         "Official GLEIF LEI concatenated file for legal-entity and headquarters presence.",
+        false,
       ),
       rr: buildEntry(
         "gleif/rr-latest.zip",
         "https://leidata.gleif.org/api/v1/concatenated-files/rr/latest/zip",
         "Official GLEIF RR (Relationship Record) concatenated file.",
+        false,
       ),
       repex: buildEntry(
         "gleif/repex-latest.zip",
         "https://leidata.gleif.org/api/v1/concatenated-files/repex/latest/zip",
         "Official GLEIF Reporting Exceptions concatenated file.",
+        false,
       ),
     },
     ghsl: {
@@ -306,6 +311,7 @@ export function getBulkSourceManifest(): BulkSourceManifest {
         "ghsl/GHS_WUP_MTUC_GLOBE_R2025A_V1_1_statistics/GHS_WUP_MTUC_MT_GLOBE_R2025A_v1_1.xlsx",
         "https://ghsl.jrc.ec.europa.eu/download.php",
         "GHSL urban centre population, land area, and multi-temporal boundary statistics.",
+        false,
       ),
       vector: buildEntry(
         "ghsl/GHS_WUP_MTUC_GLOBE_R2025A_V1_1_vector.zip",
@@ -319,16 +325,19 @@ export function getBulkSourceManifest(): BulkSourceManifest {
         "oecd/oecd-fua-economy.csv",
         "https://stats.oecd.org/",
         "OECD FUA economy indicators including GDP and productivity.",
+        false,
       ),
       fuaLabour: buildEntry(
         "oecd/oecd-fua-labour.csv",
         "https://stats.oecd.org/",
         "OECD FUA labour market indicators including employment and unemployment.",
+        false,
       ),
       municipalities: buildEntry(
         "oecd/list_of_municipalities_in_FUAs_and_Cities.csv",
         "https://stats.oecd.org/",
         "OECD municipality to FUA/city membership mapping.",
+        false,
       ),
       citiesBoundaries: buildEntry(
         "oecd/cities (4)/cities.shp",
@@ -434,6 +443,7 @@ export function getBulkSourceManifest(): BulkSourceManifest {
         "worldportindex/wpi_data_download/wpi_data_download/WPI.csv",
         "https://msi.nga.mil/NGAPortal/MSI.portal",
         "World Port Index comprehensive port facilities and services data.",
+        false,
       ),
     },
     usgs: {

@@ -3,6 +3,12 @@ import { coverageStateSchema, observationStatusSchema, sourceMetaSchema } from "
 
 export const cityGeometryModeSchema = z.enum(["exact", "city_presence"]);
 export const confidenceStateSchema = coverageStateSchema;
+export const cityPlaceClassSchema = z.enum(["city", "subordinate_place", "region"]);
+export const citySourceIdsSchema = z.object({
+  geonames: z.string(),
+  wikidata: z.string().optional(),
+  osm: z.string().optional(),
+});
 
 export const cityRoleTagSchema = z.enum([
   "capital",
@@ -15,11 +21,15 @@ export const cityRoleTagSchema = z.enum([
   "technology hub",
 ]);
 
-export const citySchema = z.object({
+const cityRecordSchema = z.object({
   cityId: z.string(),
   slug: z.string(),
   name: z.string(),
   aliases: z.array(z.string()).optional(),
+  placeClass: cityPlaceClassSchema.optional(),
+  featureClass: z.string().optional(),
+  featureCode: z.string().optional(),
+  sourceIds: citySourceIdsSchema.optional(),
   countryIso2: z.string().length(2).optional(),
   countryIso3: z.string().length(3),
   countrySlug: z.string(),
@@ -36,6 +46,24 @@ export const citySchema = z.object({
   roleTags: z.array(cityRoleTagSchema).optional(),
   isMajorCity: z.boolean().default(false),
 });
+
+type CompatibleCityRecord = Omit<
+  z.infer<typeof cityRecordSchema>,
+  "placeClass" | "sourceIds"
+> & {
+  placeClass?: z.infer<typeof cityPlaceClassSchema>;
+  sourceIds?: z.infer<typeof citySourceIdsSchema>;
+};
+
+export const citySchema = cityRecordSchema.transform(
+  (city): CompatibleCityRecord => ({
+    ...city,
+    placeClass: city.placeClass ?? "city",
+    sourceIds: city.sourceIds ?? {
+      geonames: city.cityId.replace(/^geo-/, ""),
+    },
+  }),
+);
 
 export const cityEntitySchema = z.object({
   entityId: z.string(),
@@ -89,6 +117,8 @@ export const citySearchIndexEntrySchema = z.object({
   slug: z.string(),
   name: z.string(),
   aliases: z.array(z.string()),
+  placeClass: cityPlaceClassSchema.optional(),
+  featureCode: z.string().optional(),
   countryIso3: z.string(),
   admin1Name: z.string().optional(),
   population: z.number().nullable().optional(),
@@ -140,7 +170,7 @@ export const cityCoverageShellCategorySchema = z.object({
 export const cityCoverageShellSchema = z.object({
   generatedAt: z.string(),
   cityId: z.string(),
-  boundaryStatus: citySchema.shape.boundaryStatus,
+  boundaryStatus: cityRecordSchema.shape.boundaryStatus,
   sourceCount: z.number().int().nonnegative(),
   mappedCategoryCount: z.number().int().nonnegative(),
   documentedCategoryCount: z.number().int().nonnegative(),

@@ -130,6 +130,8 @@ export async function generateSearchIndex(): Promise<CitySearchIndexEntry[]> {
       slug: city.slug,
       name: city.name,
       aliases: city.aliases ?? [],
+      placeClass: city.placeClass ?? "city",
+      featureCode: city.featureCode,
       countryIso3: city.countryIso3,
       admin1Name: city.admin1Name,
       population: city.population,
