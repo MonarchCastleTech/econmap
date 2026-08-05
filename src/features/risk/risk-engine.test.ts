@@ -7,7 +7,7 @@ describe("risk engine", () => {
     const result = buildRiskScore("turkiye");
 
     expect(result.entityId).toBe("turkiye");
-    expect(result.dimensions).toHaveLength(6);
+    expect(result.dimensions).toHaveLength(10);
     expect(result.score).toBeGreaterThan(0);
     expect(result.band).toMatch(/low|moderate|elevated|high/);
   });

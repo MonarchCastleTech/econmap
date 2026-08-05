@@ -16,10 +16,13 @@
 
 ## ✨ Highlights
 - **City-first global atlas.** Select any city on the map to open a dedicated workspace — economic factbook, investor and site-selection signals, urban intelligence, and entity presence, with the map as the primary surface.
-- **Country factbooks.** Per-country views spanning overview, trade, demographics, risk, forecast, and a transparent methodology tab.
-- **Source-backed observations.** Annual country indicators are built locally from a reproducible World Bank snapshot; the global city layer is resolved from authoritative bulk sources (GeoNames, OurAirports, UN/LOCODE) with strict attribution.
+- **Country factbooks.** 75+ countries with full metric profiles spanning overview, trade, demographics, risk, forecast, and a transparent methodology tab.
+- **Entity resolution & network analysis.** Palantir-style relationship mapping across 30+ major corporations, supply chain links, and industry clusters with path-finding and influence scoring.
+- **Supply chain intelligence.** 12+ global trade corridors, 20+ logistics hubs, and single-source vulnerability detection for critical supply chains.
+- **Investigation tools.** Structured timeline events, active investigations, pattern detection alerts, and confidence-scored anomaly detection.
+- **Source-backed observations.** 100+ data sources including World Bank, IMF, OECD, BIS, UN Comtrade, UNCTAD, ILO, FAO, WHO, and national statistical offices.
 - **Provenance-first by design.** Every nontrivial field carries source and confidence; unverified data is stored explicitly as `null` / `unknown` / `not_covered_yet` — never fabricated, inferred, or interpolated.
-- **Analyst tooling.** Compare, rankings, an indicator library, corridors, datasets browser, dashboards, reports, and story mode — with CSV export across the relevant views.
+- **Analyst tooling.** Compare, rankings, an indicator library, corridors, datasets browser, dashboards, reports, story mode, and network analysis — with CSV export across the relevant views.
 - **A published data audit gate.** A repeatable data audit (`audit:data`) must pass before a build is allowed to publish.
 - **Static, reproducible delivery.** Built as a fully static Next.js export and shipped to GitHub Pages via an auditable release-and-deploy pipeline. **News is excluded by design.**
 
@@ -45,7 +48,13 @@ Selecting a city opens a dedicated workspace: city identity and admin hierarchy,
 Each country has a factbook with overview, trade, demographics, risk, forecast, and a methodology tab that documents how derived figures are produced.
 
 ### Analysis surfaces
-Compare (normalized multi-entity comparison with radar/bar charts and CSV export), rankings (metric switching + export), an indicator library grouped by category, corridors, a datasets browser, dashboards, reports, and story mode.
+Compare (normalized multi-entity comparison with radar/bar charts and CSV export), rankings (metric switching + export), an indicator library grouped by category, corridors, a datasets browser, dashboards, reports, story mode, and economic similarity engine.
+
+### Entity network & supply chain
+Map relationships between major corporations, trace supply chain dependencies, and identify single points of failure. Network clusters reveal industry ecosystems (semiconductors, EVs, energy, big tech, pharma, aerospace) with path-finding between entities.
+
+### Investigation center
+Track active investigations, browse historical timeline events (crises, sanctions, devaluations, reforms), and review AI-detected patterns with confidence scores and recommended actions.
 
 ## 🗂️ Data & provenance
 EconMap is built on the Monarch Castle doctrine of **evidence before assertion**. Provenance is a product feature, not an afterthought.
