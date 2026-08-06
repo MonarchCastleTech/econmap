@@ -8,10 +8,13 @@ import {
   Globe2,
   LayoutDashboard,
   LineChart,
+  Link,
   Map,
   Network,
   Route,
   FileText,
+  Search,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,6 +34,9 @@ export type NavItemDef = {
 export const WORKSPACE_NAV: NavItemDef[] = [
   { href: "/", label: "Map", icon: Map, description: "City-first OSINT atlas" },
   { href: "/osint", label: "OSINT", icon: Crosshair, description: "Search-first city intelligence lookup" },
+  { href: "/entity-network", label: "Entity Network", icon: Link, description: "Corporate relationship mapping" },
+  { href: "/supply-chain", label: "Supply Chain", icon: Network, description: "Trade corridors & logistics" },
+  { href: "/investigations", label: "Investigations", icon: Search, description: "Case files & pattern alerts" },
   { href: "/compare", label: "Compare", icon: GitCompare, description: "City & country comparison" },
   { href: "/rankings", label: "Rankings", icon: BarChart3, description: "Evidence-backed ranking slices" },
   { href: "/indicators", label: "Indicators", icon: LineChart, description: "Indicator library" },
@@ -49,6 +55,7 @@ export const SECONDARY_NAV: NavItemDef[] = [
   { href: "/compare/blocs", label: "Blocs", icon: Network, description: "Geopolitical bloc aggregation" },
   { href: "/regions", label: "Regions", icon: Globe2, description: "Subnational region profiles" },
   { href: "/datasets", label: "Datasets", icon: Database, description: "Dataset catalog" },
+  { href: "/cities", label: "Global Cities", icon: Building2, description: "Every city knowledge base" },
 ];
 
 /**
