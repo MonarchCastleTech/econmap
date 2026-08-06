@@ -420,7 +420,7 @@ export const countrySeeds: CountrySeed[] = [
     trendProfile: "mature",
     metrics: {
       population: 84_400_000,
-      gdpCurrentUsd: 4_750_000_000_000,
+      gdpCurrentUsd: 4_685_592_577_805,
       gdpGrowth: 1.2,
       inflationCpi: 2.4,
       inflationPpi: 1.9,

@@ -85,6 +85,11 @@ export function HomeShell({
       <SettingsModal />
       <KeyboardShortcutsModal />
 
+      <div className="pointer-events-none absolute left-4 top-4 z-50 text-left">
+        <p className="text-sm font-bold tracking-wide text-white">EconMap</p>
+        <p className="text-[10px] tracking-wider text-slate-400">Part of Monarch Castle Technologies</p>
+      </div>
+
       <section
         data-testid="tactical-globe-stage"
         data-layout="immersive-stage"
