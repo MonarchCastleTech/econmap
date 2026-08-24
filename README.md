@@ -159,7 +159,7 @@ Lifecycle: **Active**. The badge and this statement describe maintenance status,
 
 ## Public access
 
-[Open the published project](https://monarchcastle.tech/econmap/)
+[Open the published project](https://monarchcastletech.github.io/econmap/)
 
 ## Screenshots
 

@@ -19,7 +19,7 @@ test("MonarchCastleTech/econmap exposes the complete repository documentation co
   assert.ok(match, "README must include the managed repository-hygiene block");
   assert.ok(contract.includes("Source-backed, city-first OSINT economic atlas — a dark, map-first economic intelligence app. Financial Intelligence, Monarch Castle Technologies."), "README purpose must match the canonical registry");
   assert.match(contract, /lifecycle-active/);
-  assert.ok(contract.includes("https://monarchcastle.tech/econmap/"));
+  assert.ok(contract.includes("https://monarchcastletech.github.io/econmap/"));
   for (const heading of expectedHeadings) assert.ok(contract.includes(`## ${heading}`), `missing heading: ${heading}`);
   for (const evidence of methodologyEvidence) {
     assert.ok(existsSync(resolve(root, evidence)), `missing methodology evidence: ${evidence}`);
