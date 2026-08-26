@@ -10,6 +10,7 @@ type SidebarHeaderProps = {
 
 /** Header: brand wordmark + live signal + a single collapse control. No `<h1>` hero. */
 export function SidebarHeader({ viewLabel, onCollapse }: SidebarHeaderProps) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   return (
     <div className="border-b border-[#232825] pb-3">
       <div className="flex items-start justify-between gap-3">
@@ -19,7 +20,7 @@ export function SidebarHeader({ viewLabel, onCollapse }: SidebarHeaderProps) {
           className="portfolio-lockup min-w-0"
         >
           <img
-            src="/logo-dark.png"
+            src={`${basePath}/logo-dark.png`}
             alt="EconMap"
             className="h-10 w-auto max-w-[11rem] shrink-0 object-contain"
           />

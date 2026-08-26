@@ -64,6 +64,16 @@ describe("TacticalSidebar (tactical command rail v2)", () => {
     expect(logo).toHaveClass("h-10", "w-auto", "object-contain");
   });
 
+  it("prefixes the lockup asset for a GitHub Pages project build", () => {
+    process.env.NEXT_PUBLIC_BASE_PATH = "/econmap";
+    renderFreshClone();
+    expect(screen.getByRole("img", { name: "EconMap" })).toHaveAttribute(
+      "src",
+      "/econmap/logo-dark.png",
+    );
+    delete process.env.NEXT_PUBLIC_BASE_PATH;
+  });
+
   it("keeps the mission-console smoke attribute", () => {
     renderFreshClone();
     expect(screen.getByTestId("tactical-command-rail")).toHaveAttribute("data-layout", "mission-console");
