@@ -9,11 +9,6 @@ import {
   TOTAL_GLOBAL_CITIES,
 } from "@/data/mock/global-city-runtime";
 
-export const metadata = {
-  title: "Global Cities — EconMap",
-  description: "Every city knowledge base. Browse, search, and explore cities worldwide.",
-};
-
 export default function CitiesPage() {
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"all" | "capitals" | "search">("all");

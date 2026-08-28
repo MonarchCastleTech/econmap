@@ -17,12 +17,12 @@ import urllib.request
 from pathlib import Path, PurePosixPath
 
 
-TAG = "site-20260624"
+TAG = "site-20260728-city-intelligence"
 ARCHIVE_URL = (
     "https://github.com/MonarchCastleTech/econmap/releases/download/"
     f"{TAG}/econmap-site.tar.gz"
 )
-EXPECTED_SHA256 = "94a0f3cf479aafb311db72b9483d4bacd663e9078e6bcef8d1414038f61036d3"
+EXPECTED_SHA256 = "c3770b4595ab9f40fa2cebd4913c9c07ccfbfb88217d702a55ffa658d2f0529f"
 DOWNLOAD_DEADLINE_SECONDS = 110
 
 ROOT = Path(__file__).resolve().parents[2]
