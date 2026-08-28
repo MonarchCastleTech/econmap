@@ -53,6 +53,7 @@ export function SidebarFooter({ datasetWorkspaceSummary, onOpenShortcuts }: Side
       <nav aria-label="Methodology and provenance" className="grid grid-cols-2 gap-1.5">
         <Link
           href="/indicators"
+          prefetch={false}
           className="tactical-chip flex min-w-0 items-center gap-1.5 px-2 py-2 text-[10px]"
         >
           <BookOpenText aria-hidden className="size-3.5 shrink-0" />
@@ -60,6 +61,7 @@ export function SidebarFooter({ datasetWorkspaceSummary, onOpenShortcuts }: Side
         </Link>
         <Link
           href="/datasets"
+          prefetch={false}
           className="tactical-chip flex min-w-0 items-center gap-1.5 px-2 py-2 text-[10px]"
         >
           <Fingerprint aria-hidden className="size-3.5 shrink-0" />
@@ -68,6 +70,7 @@ export function SidebarFooter({ datasetWorkspaceSummary, onOpenShortcuts }: Side
       </nav>
       <Link
         href={datasetWorkspaceSummary.href}
+        prefetch={false}
         className="flex items-center gap-2 rounded-lg border border-[#272c29] bg-[#0f1112] px-2.5 py-2 transition hover:border-[#3b4334]"
       >
         <Database aria-hidden className="size-4 shrink-0 text-[#a7b47f]" />

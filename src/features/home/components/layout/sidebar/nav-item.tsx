@@ -14,6 +14,7 @@ export function NavItem({ href, label, icon: Icon, active = false, muted = false
   return (
     <Link
       href={href}
+      prefetch={false}
       aria-current={active ? "page" : undefined}
       className={`nav-item ${muted ? "text-[12px]" : "text-[13px]"}`}
     >
