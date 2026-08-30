@@ -60,7 +60,11 @@ prisma/*.db-journal
 # --- Generated & served data (regenerable via the data pipeline; large — keep out of source git) ---
 /public/data/
 /public/vendor/
-/src/data/generated/
+# Keep the two small, reviewed build baselines in git so CI can typecheck and
+# restore the remaining large city datasets from the checksum-pinned release.
+/src/data/generated/*
+!/src/data/generated/world-bank-core.json
+!/src/data/generated/global-countries.json
 /data/
 
 # Large artifacts / screenshots / scratch
