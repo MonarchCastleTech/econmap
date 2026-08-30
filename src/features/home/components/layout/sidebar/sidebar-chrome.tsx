@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { BookOpenText, Database, Fingerprint, Keyboard, PanelLeftClose } from "lucide-react";
 
 type SidebarHeaderProps = {
@@ -19,9 +20,12 @@ export function SidebarHeader({ viewLabel, onCollapse }: SidebarHeaderProps) {
           aria-label="EconMap product identity"
           className="portfolio-lockup min-w-0"
         >
-          <img
+          <Image
             src={`${basePath}/logo-dark.png`}
             alt="EconMap"
+            width={176}
+            height={40}
+            unoptimized
             className="h-10 w-auto max-w-[11rem] shrink-0 object-contain"
           />
           <p className="mt-1 text-[9px] uppercase tracking-[0.16em] text-slate-600">
