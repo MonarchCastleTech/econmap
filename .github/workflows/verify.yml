@@ -27,7 +27,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
       - run: npm ci
+      - name: Restore checksum-pinned test data
+        run: npm run data:restore-release-cache
       - run: npm run lint:product
       - run: npm run typecheck
       - run: npm test
