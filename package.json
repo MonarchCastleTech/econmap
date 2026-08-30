@@ -9,6 +9,7 @@
     "start": "next start",
     "dev:turbopack": "next dev",
     "lint": "eslint .",
+    "lint:product": "eslint src/components/charts/asset-map.tsx src/app/supply-chain/page.tsx src/features/supply-chain/components/supply-chain-panel.tsx src/features/risk/risk-engine.ts src/features/home/components/home-shell.tsx src/features/home/components/home-stage.tsx src/features/home/components/layout/sidebar/sidebar-chrome.tsx src/features/home/components/layout/sidebar/status-badge.ts src/features/home/components/layout/sidebar/map-layers-group.tsx src/features/home/components/layout/sidebar/layer-toggle-row.tsx tests/repository-hygiene.test.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "data:cities": "tsx scripts/data/cities/run-pipeline.ts",

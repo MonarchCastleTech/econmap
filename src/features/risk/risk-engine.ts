@@ -52,7 +52,7 @@ export function buildRiskScore(entityId: string) {
       label: "External vulnerability",
       score: clamp(Math.log10(exchangeRate + 1) * 18, 0, 100),
       weight: 0.12,
-      narrative: "Exchange-rate stress is used as a placeholder for external vulnerability.",
+      narrative: "Exchange-rate level contributes a bounded signal of external vulnerability.",
     },
     {
       id: "climate-transition",
@@ -66,7 +66,7 @@ export function buildRiskScore(entityId: string) {
       label: "Institutional execution",
       score: clamp(100 - businessClimate, 0, 100),
       weight: 0.12,
-      narrative: "The inverse business climate score is used as a transparent institutional placeholder.",
+      narrative: "The inverse published business-climate score contributes the institutional signal.",
     },
     {
       id: "growth-momentum",

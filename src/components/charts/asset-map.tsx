@@ -98,15 +98,13 @@ export function AssetMap({ assets, center }: { assets: AssetRecord[], center: [n
       map.current.on('click', 'assets-layer', (e) => {
         if (!e.features || !e.features[0]) return;
         const feature = e.features[0];
-        const coordinates = (feature.geometry as any).coordinates.slice();
-        const { name, subtype, priority, category } = feature.properties as any;
-
-        // Generate mock dependencies based on priority to simulate the Blast Radius graph
-        let blastRadius = "10km";
-        let deps = 1;
-        if (priority === 'critical') { blastRadius = "500km"; deps = Math.floor(Math.random() * 5) + 5; }
-        else if (priority === 'high') { blastRadius = "100km"; deps = Math.floor(Math.random() * 3) + 2; }
-        else if (priority === 'medium') { blastRadius = "50km"; deps = Math.floor(Math.random() * 2) + 1; }
+        if (feature.geometry.type !== "Point") return;
+        const coordinates = feature.geometry.coordinates.slice() as [number, number];
+        const properties = feature.properties ?? {};
+        const name = String(properties.name ?? "Unnamed asset");
+        const subtype = String(properties.subtype ?? "Unclassified");
+        const priority = String(properties.priority ?? "unrated");
+        const category = String(properties.category ?? "Unclassified");
 
         const html = `
           <div style="font-family: inherit; color: #333; min-width: 200px;">
@@ -115,15 +113,9 @@ export function AssetMap({ assets, center }: { assets: AssetRecord[], center: [n
               ${category} • ${subtype}
             </p>
             <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">
-              <div style="font-size: 11px; font-weight: bold; color: #999; margin-bottom: 4px;">DEPENDENCY GRAPH</div>
+              <div style="font-size: 11px; font-weight: bold; color: #999; margin-bottom: 4px;">PUBLISHED CLASSIFICATION</div>
               <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
                 <span>Priority:</span> <span style="font-weight: 500;">${priority.toUpperCase()}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
-                <span>Blast Radius:</span> <span style="font-weight: 500;">${blastRadius}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                <span>Linked Nodes:</span> <span style="font-weight: 500;">${deps} dependent entities</span>
               </div>
             </div>
           </div>

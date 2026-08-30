@@ -37,7 +37,7 @@ function renderFreshClone() {
       datasetWorkspaceSummary={{
         href: "/datasets",
         label: "Dataset explorer",
-        meta: "inspect source workspaces and parser status",
+        meta: "inspect published datasets and update status",
       }}
       featuredCities={[]}
       recentCities={[]}
@@ -119,9 +119,9 @@ describe("TacticalSidebar (tactical command rail v2)", () => {
     }
   });
 
-  it("renders honest coverage-pending placeholders for empty layer families on a fresh clone", () => {
+  it("renders clear unavailable states for empty layer families on a fresh clone", () => {
     renderFreshClone();
-    const pendingBadges = screen.getAllByText(/^coverage pending$/i);
+    const pendingBadges = screen.getAllByText(/^not available$/i);
     expect(pendingBadges.length).toBeGreaterThan(0);
     // Real source labels are shown alongside the pending state.
     expect(screen.getByText(/^Natural Earth$/)).toBeInTheDocument();

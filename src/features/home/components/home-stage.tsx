@@ -627,7 +627,7 @@ function getSelectedCityIntel({
 
   return {
     kind: "selected-city",
-    cityMeta: `${selectedCityPanel.city.admin1Name ?? "Admin region not labeled"} / ${selectedCityPanel.city.countryIso3}`,
+    cityMeta: `${selectedCityPanel.city.admin1Name ?? "Region unavailable"} / ${selectedCityPanel.city.countryIso3}`,
     cityName: selectedCityPanel.city.name,
     clearHref: hrefFor({
       searchQuery,
@@ -666,7 +666,7 @@ function getInfosPanel({
 
   return {
     adminBadge: getAdminBadgeLabel(city?.admin1Name, city?.admin1Code),
-    cityMeta: `${city?.admin1Name ?? "Admin region not labeled"} / ${city?.countryIso3 ?? "UNK"}`,
+    cityMeta: `${city?.admin1Name ?? "Region unavailable"} / ${city?.countryIso3 ?? "Location unavailable"}`,
     cityName: city?.name ?? "No city selected",
     flagEmoji: countryCodeToFlagEmoji(city?.countryIso2),
     metrics: buildInfosMetrics({
@@ -705,7 +705,7 @@ function buildSearchResults({
       activeBaseImageryLayerId,
       activeDate,
     }),
-    meta: `${city.admin1Name ?? "Admin region not labeled"} / ${city.countryIso3}`,
+    meta: `${city.admin1Name ?? "Region unavailable"} / ${city.countryIso3}`,
     name: city.name,
     populationLabel: city.population ? compactNumber.format(city.population) : "n/a",
     selected: city.slug === selectedCitySlug,
@@ -739,7 +739,7 @@ function buildFeaturedCityResults({
       activeBaseImageryLayerId,
       activeDate,
     }),
-    meta: `${city.admin1Name ?? "Admin region not labeled"} / ${city.countryIso3}`,
+    meta: `${city.admin1Name ?? "Region unavailable"} / ${city.countryIso3}`,
     name: city.name,
     populationLabel: city.population ? compactNumber.format(city.population) : "n/a",
     selected: city.slug === selectedCitySlug,
@@ -773,7 +773,7 @@ function buildRecentCityResults({
       activeBaseImageryLayerId,
       activeDate,
     }),
-    meta: `${city.admin1Name ?? "Admin region not labeled"} / ${city.countryIso3}`,
+    meta: `${city.admin1Name ?? "Region unavailable"} / ${city.countryIso3}`,
     name: city.name,
     populationLabel: city.population ? compactNumber.format(city.population) : "n/a",
     selected: city.slug === selectedCitySlug,
@@ -1270,7 +1270,7 @@ export function HomeStage({
           />
         </div>
 
-        <div className="pointer-events-auto absolute right-3 top-3 flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-3">
+        <div className="pointer-events-auto absolute right-3 top-3 hidden max-w-[calc(100vw-1.5rem)] flex-col items-end gap-3 sm:flex">
           <nav aria-label="Map controls" className="max-w-full overflow-x-auto">
             <TopControlCluster />
           </nav>

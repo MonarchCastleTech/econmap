@@ -12,7 +12,7 @@ export function getStatusBadge(kind: StatusBadgeKind): { className: string; labe
     case "documented":
       return { className: "status-documented", label: "documented" };
     case "coverage-pending":
-      return { className: "coverage-pending", label: "coverage pending" };
+      return { className: "coverage-pending", label: "not available" };
     default:
       return { className: "status-missing", label: "missing" };
   }

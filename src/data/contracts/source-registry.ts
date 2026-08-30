@@ -125,7 +125,7 @@ export const sourceCatalog = sourceRegistryEntrySchema.array().parse([
     name: "WTO Trade Data",
     updatedAt: "2025-12-18",
     coverage: "Medium",
-    methodology: "Trade totals and composition placeholder until Comtrade cutover is complete.",
+    methodology: "Annual trade totals and composition used alongside the UN Comtrade series.",
     category: "trade",
     cadence: "Annual",
     supports: ["actual", "estimate"],

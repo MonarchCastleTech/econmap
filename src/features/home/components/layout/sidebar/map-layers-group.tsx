@@ -65,13 +65,13 @@ export function MapLayersGroup({
             ) : (
               <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-300/25 bg-amber-300/[0.04] px-2.5 py-2">
                 <span className="min-w-0">
-                  <span className="block truncate text-[11px] text-slate-400">No published layer yet</span>
+                  <span className="block truncate text-[11px] text-slate-400">Layer not available</span>
                   <span className="mt-0.5 block truncate text-[10px] uppercase tracking-[0.14em] text-slate-500">
                     {family.pendingSourceLabel}
                   </span>
                 </span>
                 <span className="tactical-chip coverage-pending shrink-0 px-1.5 py-0.5 text-[9px] tracking-[0.16em]">
-                  coverage pending
+                  not available
                 </span>
               </div>
             )}
@@ -82,7 +82,7 @@ export function MapLayersGroup({
           className="tactical-chip flex w-fit items-center gap-1.5 px-2.5 py-1 text-[10px]"
         >
           <Layers aria-hidden className="size-3" />
-          Generate map data
+          View dataset coverage
         </Link>
       </div>
 

@@ -1,0 +1,81 @@
+name: Verify product
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:product
+      - run: npm run typecheck
+      - run: npm test
+
+  reviewed-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Restore checksum-pinned public data
+        run: npm run data:restore-release-cache
+      - name: Build static product
+        env:
+          NEXT_BUILD_CPUS: 2
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: [source-contract, reviewed-build]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v6
+      - id: pages
+        uses: actions/deploy-pages@v5
+
+  live-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify published product
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://monarchcastletech.github.io/econmap/"
+          for path in "" "supply-chain/" "datasets/"; do
+            curl --fail --silent --show-error --retry 3 --max-time 30 "${base}${path}" >/dev/null
+          done

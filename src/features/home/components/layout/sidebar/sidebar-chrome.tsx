@@ -24,6 +24,9 @@ export function SidebarHeader({ viewLabel, onCollapse }: SidebarHeaderProps) {
             alt="EconMap"
             className="h-10 w-auto max-w-[11rem] shrink-0 object-contain"
           />
+          <p className="mt-1 text-[9px] uppercase tracking-[0.16em] text-slate-600">
+            Part of Monarch Castle Technologies
+          </p>
           <p className="mt-1 truncate text-[10px] uppercase tracking-[0.2em] text-slate-500">
             Command rail · live · {viewLabel}
           </p>

@@ -76,7 +76,7 @@ export function HomeShell({
   const datasetWorkspaceSummary = {
     href: "/datasets",
     label: "Dataset explorer",
-    meta: `${commandCenterManifest.datasetInventory.length} source workspaces`,
+    meta: `${commandCenterManifest.datasetInventory.length} published datasets`,
   };
 
   return (
@@ -84,11 +84,6 @@ export function HomeShell({
       <LayerLegendModal baseImageryCatalog={baseImageryCatalog} globeManifest={globeManifest} />
       <SettingsModal />
       <KeyboardShortcutsModal />
-
-      <div className="pointer-events-none absolute left-4 top-4 z-50 text-left">
-        <p className="text-sm font-bold tracking-wide text-white">EconMap</p>
-        <p className="text-[10px] tracking-wider text-slate-400">Part of Monarch Castle Technologies</p>
-      </div>
 
       <section
         data-testid="tactical-globe-stage"

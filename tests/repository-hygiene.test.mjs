@@ -69,3 +69,23 @@ test("MonarchCastleTech/econmap documents citation, rights, and HTTPS policy", (
     assert.ok([...allowedHttp].some((prefix) => prefix && link.startsWith(prefix)), `HTTP link lacks an explicit exception: ${link}`);
   }
 });
+
+test("public product surfaces remain deterministic, honest, and mobile-safe", () => {
+  const assetMap = readFileSync(resolve(root, "src/components/charts/asset-map.tsx"), "utf8");
+  const supplyChain = readFileSync(
+    resolve(root, "src/features/supply-chain/components/supply-chain-panel.tsx"),
+    "utf8",
+  );
+  const homeShell = readFileSync(resolve(root, "src/features/home/components/home-shell.tsx"), "utf8");
+  const homeStage = readFileSync(resolve(root, "src/features/home/components/home-stage.tsx"), "utf8");
+  const publicSource = [assetMap, supplyChain, homeShell, homeStage].join("\n");
+
+  assert.ok(!assetMap.includes("Math.random"), "asset intelligence must be deterministic");
+  assert.ok(!assetMap.includes("Blast Radius"), "unsupported blast-radius claims must not ship");
+  assert.match(supplyChain, /Reference model\./);
+  assert.match(supplyChain, /not a live logistics feed/);
+  for (const phrase of ["Admin region not labeled", "UNK", "source workspaces", "coverage pending"]) {
+    assert.ok(!publicSource.includes(phrase), `internal phrase must not ship: ${phrase}`);
+  }
+  assert.match(homeStage, /hidden max-w-\[calc\(100vw-1\.5rem\)\].*sm:flex/);
+});

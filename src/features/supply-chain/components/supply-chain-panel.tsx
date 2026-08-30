@@ -8,7 +8,7 @@ import {
   logisticsHubs,
   tradeCorridors,
 } from "@/data/mock/trade-corridors";
-import { supplyChainLinks, type SupplyChainLink } from "@/data/mock/entity-network";
+import { supplyChainLinks } from "@/data/mock/entity-network";
 
 export function SupplyChainPanel() {
   const [selectedRisk, setSelectedRisk] = useState<"all" | "critical" | "high" | "medium" | "low">("all");
@@ -25,9 +25,14 @@ export function SupplyChainPanel() {
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-amber-300/30 bg-amber-300/[0.06] px-4 py-3 text-sm text-amber-100">
+        <strong>Reference model.</strong> Corridor, risk, and dependency values are a static,
+        deterministic scenario for exploration—not a live logistics feed. Source methodology is
+        available in the dataset explorer; verify current conditions before operational use.
+      </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-          <p className="text-xs uppercase tracking-wider text-slate-400">Active Corridors</p>
+          <p className="text-xs uppercase tracking-wider text-slate-400">Modeled Corridors</p>
           <p className="mt-2 text-3xl font-bold text-white">{tradeCorridors.length}</p>
         </div>
         <div className="rounded-2xl border border-red-400/20 bg-red-400/5 p-5">
@@ -41,7 +46,7 @@ export function SupplyChainPanel() {
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <h3 className="text-lg font-semibold text-white">Top Corridors by Trade Volume</h3>
+          <h3 className="text-lg font-semibold text-white">Reference Corridors by Indicative Volume</h3>
         <div className="mt-4 space-y-3">
           {topCorridors.map((corridor) => (
             <div key={corridor.id} className="rounded-xl border border-white/5 bg-slate-900/40 p-4">
@@ -53,7 +58,7 @@ export function SupplyChainPanel() {
                   </p>
                 </div>
                 <span className="rounded-full bg-cyan-400/10 px-2 py-1 text-xs text-cyan-300">
-                  ${(corridor.annualVolumeUsd ?? 0 / 1e12).toFixed(1)}T/yr
+                  ${((corridor.annualVolumeUsd ?? 0) / 1e12).toFixed(1)}T/yr
                 </span>
               </div>
               {corridor.chokepoints && corridor.chokepoints.length > 0 && (
@@ -72,7 +77,7 @@ export function SupplyChainPanel() {
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">Trade Corridors</h3>
+          <h3 className="text-lg font-semibold text-white">Modeled Trade Corridors</h3>
           <select
             value={selectedRisk}
             onChange={(e) => setSelectedRisk(e.target.value as typeof selectedRisk)}
@@ -111,7 +116,7 @@ export function SupplyChainPanel() {
       </div>
 
       <div className="rounded-2xl border border-red-400/20 bg-red-400/5 p-6">
-        <h3 className="text-lg font-semibold text-red-200">Supply Chain Vulnerabilities</h3>
+        <h3 className="text-lg font-semibold text-red-200">Modeled Supply Chain Vulnerabilities</h3>
         <p className="mt-1 text-sm text-red-300/70">
           Links with no alternative sources (single points of failure)
         </p>

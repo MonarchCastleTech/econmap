@@ -41,7 +41,7 @@ export function LayerToggleRow({ row }: { row: MapLayerToggleRow }) {
               : "border-[#3a4037] bg-[#121515] text-slate-400"
           }`}
         >
-          {row.active ? "on" : "off"}
+          {row.active ? "visible" : "hidden"}
         </span>
       </span>
     </Link>

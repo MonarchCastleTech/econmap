@@ -622,7 +622,7 @@ describe("HomeShell", () => {
     expect(screen.getAllByText(/^organizations$/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/^dataset explorer$/i)).toBeInTheDocument();
     expect(screen.getByRole("banner", { name: /econmap product identity/i })).toBeInTheDocument();
-    expect(screen.getByText(/^econmap$/i)).toBeInTheDocument();
+    expect(screen.getByAltText(/^econmap$/i)).toBeInTheDocument();
     expect(screen.getByText(/^part of monarch castle technologies$/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^methodology$/i })).toHaveAttribute("href", "/indicators");
     expect(screen.getByRole("link", { name: /^provenance$/i })).toHaveAttribute("href", "/datasets");
@@ -634,9 +634,9 @@ describe("HomeShell", () => {
     expect(screen.queryByText(/^timeline$/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/toggle timeline/i)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^open full city dossier$/i })).toBeInTheDocument();
-    // Real ON/OFF layer toggles for published layers.
-    expect(screen.getAllByText(/^on$/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/^off$/i).length).toBeGreaterThan(0);
+    // Clear visibility states for published layers.
+    expect(screen.getAllByText(/^visible$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^hidden$/i).length).toBeGreaterThan(0);
   });
 
   it("falls back to published counts instead of dead placeholders when GDP is unavailable", () => {
