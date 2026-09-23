@@ -4,8 +4,8 @@ import { blocs } from "@/data/normalized/blocs";
 import { historicalEvents } from "@/data/normalized/events";
 import { forecastSeries } from "@/data/normalized/forecasts";
 import { indicatorDefinitions } from "@/data/normalized/indicators";
-import { subnationalUnits } from "@/data/normalized/regions";
 import { tradeFlows } from "@/data/mock/trade";
+import type { SubnationalUnit } from "@/domain/types";
 
 export function getCountryBySlug(slug: string) {
   return countries.find((country) => country.slug === slug);
@@ -22,8 +22,11 @@ export function getCountrySeries(slug: string, indicatorIds: string[]) {
   );
 }
 
-export function getRegionsForCountry(countrySlug: string) {
-  return subnationalUnits.filter((region) => region.countrySlug === countrySlug);
+export function getRegionsForCountry(countrySlug: string): SubnationalUnit[] {
+  // The legacy ADM1 numeric rows have no row-level source records or vintage.
+  // Withhold them from factbooks until a verifiable regional feed is available.
+  void countrySlug;
+  return [];
 }
 
 export function getTradeFlowsForCountry(countrySlug: string) {

@@ -6,7 +6,7 @@ import { getCountryBySlug } from "@/lib/factbook";
 
 export const metadata = {
   title: "Regions — EconMap",
-  description: "Browse EconMap subnational economic profiles.",
+  description: "Subnational names are retained while numeric profiles are withheld for source review.",
 };
 
 export default function RegionsPage() {
@@ -14,7 +14,7 @@ export default function RegionsPage() {
     <PageFrame
       eyebrow="Regional intelligence"
       title="Subnational profiles"
-      description="Browse available ADM1 economic profiles with population, output, labor, income, infrastructure, and sector indicators."
+      description="The former ADM1 numeric profiles lack row-level source records and dates. Values are withheld until a verifiable regional data feed is available."
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {subnationalUnits.map((region) => {
@@ -31,9 +31,7 @@ export default function RegionsPage() {
                 {country?.name ?? region.countrySlug}
               </p>
               <h2 className="mt-2 text-lg font-semibold text-white">{region.name}</h2>
-              <p className="mt-3 text-sm text-slate-400">
-                Population {(region.population / 1_000_000).toFixed(1)}M · GDP ${Math.round(region.gdpCurrentUsd / 1_000_000_000)}B
-              </p>
+              <p className="mt-3 text-sm text-slate-400">Numeric profile withheld pending source verification.</p>
             </Link>
           );
         })}

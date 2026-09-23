@@ -16,7 +16,7 @@
 
 ## ✨ Highlights
 - **City-first global atlas.** Select any city on the map to open a dedicated workspace — economic factbook, investor and site-selection signals, urban intelligence, and entity presence, with the map as the primary surface.
-- **Country factbooks.** 75+ countries with full metric profiles spanning overview, trade, demographics, risk, forecast, and a transparent methodology tab.
+- **Country factbooks.** 75+ countries with source-linked annual indicators, transparent methods, and explicitly labeled illustrative scenarios. Composite risk and unsourced regional values are withheld.
 - **Entity resolution & network analysis.** Palantir-style relationship mapping across 30+ major corporations, supply chain links, and industry clusters with path-finding and influence scoring.
 - **Supply chain intelligence.** 12+ global trade corridors, 20+ logistics hubs, and single-source vulnerability detection for critical supply chains.
 - **Investigation tools.** Structured timeline events, active investigations, pattern detection alerts, and confidence-scored anomaly detection.
@@ -45,7 +45,7 @@ The home route is an analyst workspace with map-driven navigation, filters, URL-
 Selecting a city opens a dedicated workspace: city identity and admin hierarchy, role tags (e.g. `capital`, `port city`, `manufacturing hub`, `logistics hub`, `financial center`), data-coverage badges, last-verified dates, and entity layers. Exact-site markers (where precise evidence exists) are rendered distinctly from city-level presence markers (where only city-wide evidence exists).
 
 ### Country factbooks
-Each country has a factbook with overview, trade, demographics, risk, forecast, and a methodology tab that documents how derived figures are produced.
+Each country has a factbook with overview, trade, demographics, and a methodology tab. The risk tab explains why the previous composite score is withheld; the growth path is labeled as an illustrative scenario.
 
 ### Analysis surfaces
 Compare (normalized multi-entity comparison with radar/bar charts and CSV export), rankings (metric switching + export), an indicator library grouped by category, corridors, a datasets browser, dashboards, reports, story mode, and economic similarity engine.
@@ -210,7 +210,9 @@ Original software history is maintained in Git. External datasets, reports, trad
 
 ## Forecast limitations
 
-This repository does not publish a guaranteed forecast. Any scenarios, scores, or forward-looking language are analytical aids, not facts or advice; review source dates and methodology before use.
+The displayed growth path is an **illustrative arithmetic scenario**, not a model forecast. It begins with the latest available GDP-growth observation and adds 0.15 percentage points for each displayed year. The other demonstration scenarios use the fixed offsets declared in `src/data/normalized/forecasts.ts`. These steps and offsets are assumptions, have not been calibrated or backtested, and must not be quoted as predicted outcomes. A scenario is omitted when its starting observation is unavailable.
+
+The former country composite risk score is withheld from the public factbook. Its fixed missing-value defaults and currency-level proxy did not support a defensible cross-country comparison. Country source observations remain visible. The former ADM1 numeric profiles are also withheld from the public pages because they lack row-level source links and observation dates. Regional names remain for navigation only. Both layers require documented source coverage and a revised method before republication.
 
 ## Security
 

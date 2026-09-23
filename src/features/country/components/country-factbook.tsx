@@ -7,7 +7,6 @@ import { MetricCard } from "@/components/data/metric-card";
 import { PageFrame } from "@/components/layout/page-frame";
 import { EmptyState } from "@/components/states/empty-state";
 import { countryProfiles } from "@/data/mock/countries";
-import { buildRiskScore } from "@/features/risk/risk-engine";
 import { findSimilarEconomies } from "@/features/similarity/similarity-engine";
 import {
   getForecasts,
@@ -59,7 +58,6 @@ export function CountryFactbook({ slug }: { slug: string }) {
   const peers = findSimilarEconomies(slug, 4);
 
   const growthForecast = forecast.find((entry) => entry.indicatorId === "gdp-growth");
-  const risk = buildRiskScore(slug);
 
   const growthSeries =
     growthForecast?.scenarios[0]?.values.map((point) => ({
@@ -86,7 +84,7 @@ export function CountryFactbook({ slug }: { slug: string }) {
     <PageFrame
       eyebrow={`${profile.country.flag} Country factbook`}
       title={profile.country.name}
-      description={`${profile.country.capital} - ${profile.country.region} - Official-source-backed annual indicators with transparent derived risk and forecast layers.`}
+      description={`${profile.country.capital} - ${profile.country.region} - Source-linked annual indicators. Forward paths are illustrative arithmetic scenarios, not forecasts.`}
     >
       <div className="flex flex-wrap gap-2">
         {tabs.map((tab) => (
@@ -130,7 +128,10 @@ export function CountryFactbook({ slug }: { slug: string }) {
 
       {activeTab === "Overview" ? (
         <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-          <MetricLineChart data={growthSeries} dataKey="forecast" label="Growth forecast path" />
+          <div>
+            <MetricLineChart data={growthSeries} dataKey="forecast" label="Illustrative growth scenario" />
+            <p className="mt-3 text-sm text-slate-400">A fixed +0.15 percentage point annual step from the latest observation. This assumption is illustrative and has no backtest or predictive claim.</p>
+          </div>
           <div className="space-y-4 rounded-[2rem] border border-white/10 bg-slate-950/75 p-5">
             <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Snapshot</p>
             {profile.highlights.map((highlight) => (
@@ -240,27 +241,10 @@ export function CountryFactbook({ slug }: { slug: string }) {
       ) : null}
 
       {activeTab === "Risk" ? (
-        <div className="mt-6 grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="rounded-[2rem] border border-white/10 bg-slate-950/75 p-5">
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Composite risk</p>
-            <p className="mt-4 text-5xl font-semibold text-white">{risk.score}</p>
-            <p className="mt-2 text-sm text-slate-400">{risk.band.toUpperCase()} band</p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {risk.dimensions.map((dimension) => (
-              <div
-                key={dimension.id}
-                className="rounded-3xl border border-white/10 bg-slate-950/75 p-4"
-              >
-                <p className="text-sm font-medium text-white">{dimension.label}</p>
-                <p className="mt-2 text-2xl font-semibold text-cyan-300">
-                  {dimension.score.toFixed(1)}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-400">{dimension.narrative}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <EmptyState
+          title="Composite risk score withheld"
+          description="The previous heuristic filled missing indicators with defaults and used currency-unit levels as a risk proxy. Country indicators remain available with their source records; a composite will return only after a source-coverage gate and a defensible, documented model are in place."
+        />
       ) : null}
 
       {activeTab === "Methodology / Sources" ? (

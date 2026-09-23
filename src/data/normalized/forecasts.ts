@@ -15,7 +15,8 @@ const forecastIndicators = [
 export const forecastSeries = forecastSeriesSchema.array().parse(
   showcaseEntities.flatMap((entityId) =>
     forecastIndicators.map((definition) => {
-      const latest = getObservation(entityId, definition.id)?.value ?? 0;
+      const latest = getObservation(entityId, definition.id)?.value;
+      if (latest == null || !Number.isFinite(latest)) return [];
 
       const baselineValues = forecastYears.map((year, index) => {
         const growthMultiplier = definition.id === "population" ? 1 + definition.step * (index + 1) : 0;
