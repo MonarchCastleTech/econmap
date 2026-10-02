@@ -15,6 +15,8 @@ import "@fontsource/spectral/600.css";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
+import "./monarch/design.css";
+import { MonarchNavigation } from "./monarch/navigation";
 
 export const metadata: Metadata = {
   title: "EconMap",
@@ -28,8 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-slate-950 antialiased">
+      <body className="bg-slate-950 antialiased monarch-product" data-monarch-product="econmap">
+        <MonarchNavigation />
+        <div className="monarch-product-surface">
         <AppProviders>{children}</AppProviders>
+      </div>
       </body>
     </html>
   );
