@@ -40,7 +40,7 @@ import {
   type RecentCityEntry,
 } from "@/features/home/lib/analyst-sidebar-model";
 import { useHomeViewParams, type HomeViewParams } from "@/features/home/lib/use-home-view-params";
-import { loadDossier } from "@/lib/dossier-bundle-client";
+import { loadCommandCenterCityPanelClient } from "@/lib/command-center-client";
 import { readLocalStorage, writeLocalStorage } from "@/lib/storage";
 import { useWatchlistStore } from "@/store/watchlist-store";
 
@@ -929,24 +929,16 @@ export function HomeStage({
 
     let cancelled = false;
     const controller = new AbortController();
-    const params = new URLSearchParams({ slug: selectedCitySlug });
-
-    if (selectedCitySummary?.cityId) {
-      params.set("cityId", selectedCitySummary.cityId);
-    }
-
     startTransition(() => {
       setSelectedCityPanel(null);
       setSelectedCityLoading(true);
     });
 
-    // Registry-free: derive the cityId (geo-NNNN) from the summary or the slug, then read the
-    // workspace from the shared dossier bundle (one Range fetch) instead of a per-city file.
+    // Resolve and validate the complete panel from the shared dossier bundle.
     const dossierCityId =
       selectedCitySummary?.cityId ?? selectedCitySlug.match(/^(geo-\d+)-/)?.[1] ?? selectedCitySlug;
 
-    void loadDossier(dossierCityId)
-      .then((d) => (d?.w ?? null) as SelectedCityPanel | null)
+    void loadCommandCenterCityPanelClient({ cityId: dossierCityId })
       .then((nextPanel) => {
         if (cancelled) {
           return;

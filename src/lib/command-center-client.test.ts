@@ -137,6 +137,14 @@ describe("P0.3 city dossier static-export path", () => {
     expect(panel?.coverageShell?.categories[0]?.state).toBe("mapped");
   });
 
+  it("loads the full panel by city ID for the home map selection", async () => {
+    const panel = await loadCommandCenterCityPanelClient({ cityId: "geo-745044" });
+    expect(panel?.city.name).toBe("Istanbul");
+    expect(panel?.workspace?.entityCounts.airport).toBe(2);
+    expect(panel?.coverageShell?.categories[0]?.count).toBe(2);
+    expect(panel?.sources?.sources[0]?.name).toBe("GeoNames");
+  });
+
   it("keeps the workspace rich (real economicFactbook preserved, intel arrays defaulted — not hollow)", async () => {
     const panel = await loadCommandCenterCityPanelClient({ slug: "geo-745044-istanbul" });
     expect(panel?.workspace?.economicFactbook).toHaveLength(1);

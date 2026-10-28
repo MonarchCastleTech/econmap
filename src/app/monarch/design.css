@@ -24,10 +24,10 @@ body.monarch-product{
 .monarch-shell .monarch-shell-keep{padding:.45rem .7rem!important;border:1px solid #8293A3!important;color:#F4F6F8!important}
 .monarch-shell details{display:none;position:relative}
 .monarch-shell summary{cursor:pointer;padding:.5rem;font-size:12px}
-.monarch-product-surface{position:relative;transform:translateZ(0);height:calc(100dvh - var(--monarch-shell-height));min-height:0;overflow:hidden}
+.monarch-product-surface{position:relative;min-height:calc(100dvh - var(--monarch-shell-height))}
 .monarch-product-surface #root,.monarch-product-surface .esg-app{height:100%;min-height:0}
-.monarch-product-surface .min-h-screen{min-height:100%!important}
-.monarch-product-surface .h-screen,.monarch-product-surface .h-dvh{height:100%!important}
+.monarch-product-surface .min-h-screen{min-height:calc(100dvh - var(--monarch-shell-height))!important}
+.monarch-product-surface .h-screen,.monarch-product-surface .h-dvh{height:calc(100dvh - var(--monarch-shell-height))!important}
 body[data-monarch-product="nuclear-energy-intelligence"] .site-nav{top:var(--monarch-shell-height)}
 body[data-monarch-product="georisk"]>.monarch-shell{position:fixed;top:0}
 body[data-monarch-product="georisk"] .shell-topbar{top:var(--monarch-shell-height)}
